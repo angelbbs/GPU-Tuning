@@ -1,0 +1,15 @@
+*.c
+*.bc
+*.cfg
+*.bat
+*.cmd
+*.map
+*.obj
+*.ppo
+*.res
+*.tds
+*.log
+
+Configs/
+Utils/
+
