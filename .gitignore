@@ -9,6 +9,7 @@
 *.res
 *.tds
 *.log
+*.exe
 
 Configs/
 Utils/
