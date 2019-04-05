@@ -1,1 +1,1 @@
-#define progtime  "12:20:41,98" 
+#define progtime  "22:24:52,47" 

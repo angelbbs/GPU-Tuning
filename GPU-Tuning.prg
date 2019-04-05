@@ -102,7 +102,10 @@ aMinersNames:={} //for dublicates
 
 init()
 
-
+if !file("configs/general.json")
+ msgstop("stop","Error")
+ quit
+end if
 
 CreateBase_Miners("",basedir)
 select 1
