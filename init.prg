@@ -14,6 +14,7 @@ SET DATE FORMAT "dd.mm.yyyy"
 public _hOn  := LoadBitMap(GetResources(),"checkon")
 public _hOff := LoadBitMap(GetResources(),"checkoff")
 
+public oAmdBtn
 
 return nil
 

@@ -22,7 +22,8 @@ use Devices SHARED  ALIAS "Devices"
 // PASSWORD cPass4BD
  index on UUID to uuid2
  index on NAME to name2
-set index to uuid2, name2
+ index on DEVID to devid2
+set index to uuid2, name2, devid2
 dbsetorder(1)
 
 select 3

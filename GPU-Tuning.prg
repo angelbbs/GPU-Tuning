@@ -167,14 +167,13 @@ nGet3:=Overclock->P3
 nGet4:=Overclock->P4
 nGet5:=Overclock->P5
 nGet6:=Overclock->P6
-nGet14:=Devices->NUM //AMD numbering
+//nGet14:=Devices->NUM0 //AMD numbering
 nGet8:=Overclock->P8
 nGet9:=Overclock->P9
 nGet10:=Overclock->P10
 nGet11:=Overclock->P11
 nGet12:=Overclock->P12
 nGet13:=Overclock->P13
-
 
  DEFINE DIALOG oMainDlg RESOURCE "IDD_DIALOG1" TITLE "GPU-Tuning"
  REDEFINE GET oGet1 VAR nGET1 ID IDC_EDIT7 PICTURE "@Z 9999" UPDATE;
@@ -198,11 +197,13 @@ nGet13:=Overclock->P13
   UPDATE ON CHANGE (dbselectarea(2), dbrlock(), Devices->NUM0:=nGET14, dbunlock(), DevicesLbx:Refresh(), .t.)
 
 select 2
+dbsetorder(3)
+dbgotop()
  REDEFINE BROWSE DevicesLbx  ID 40000  OF oMainDlg VSCROLL FONT oFont
          ADD COLUMN TO BROWSE DevicesLbx ;
-           DATA  " "+str(Devices->NUM0);
-           HEADER " ¹" SIZE 24
-
+           DATA  " "+ iif(Devices->NVIDIA == .t. ,str(Devices->NUM),str(Devices->NUM0));
+           HEADER " N" SIZE 24
+//           DATA  " "+str(Devices->NUM0);
          ADD COLUMN TO BROWSE DevicesLbx ;
            DATA  " "+alltrim(Devices->DEVID) + " " + Devices->NAME  ;
            HEADER " Device name" SIZE 100
@@ -274,13 +275,15 @@ select 3
            DATA  Overclock->T13;
            HEADER "Fan" SIZE 30 PICTURE "@Z 9999"
 
+ REDEFINE BUTTON oAmdBtn ID 10 OF oMainDlg ACTION GetCurrentAMD()
+
 
  iif(Overclock->AMD .and. !Overclock->NVIDIA, (AMD_Enable(), NVIDIA_Disable()), )
  iif(!Overclock->AMD .and. Overclock->NVIDIA, (AMD_Disable(), NVIDIA_Enable()), )
  iif(!Overclock->AMD .and. !Overclock->NVIDIA, (AMD_Disable(), NVIDIA_Disable()), ) //cpu
 
 
-DevicesLbx:bChange:={|| (AlgoLbx:UpStable(), ChangeAlgos(), nGet14:=Devices->NUM0, oGet14:Refresh(), AlgoLbx:UpStable() )};
+DevicesLbx:bChange:={|| (AlgoLbx:UpStable(), ChangeAlgos(), iif(Devices->NVIDIA == .t., ,nGet14:=Devices->NUM0), oGet14:Refresh(), AlgoLbx:UpStable() )};
 
 AlgoLbx:nClrPane      = { || iif(Overclock->OENABLE0=.t.,CLR_HGREEN2,CLR_HGRAY2) }
 
@@ -310,7 +313,7 @@ select 2
 
 DevicesLbx:SetFocus()
 
- REDEFINE BUTTON ID 10 OF oMainDlg ACTION GetCurrentAMD()
+// REDEFINE BUTTON oAmdBtn ID 10 OF oMainDlg ACTION GetCurrentAMD()
 
  REDEFINE BUTTON ID 9 OF oMainDlg ACTION (SaveOverClockData(), oMainDlg:End())
 
@@ -330,6 +333,8 @@ Function AMD_Disable()
  oGet4:Disable()
  oGet5:Disable()
  oGet6:Disable()
+ oGet14:Disable()
+ oAmdBtn:Disable()
 return nil
 
 Function AMD_Enable()
@@ -339,6 +344,8 @@ Function AMD_Enable()
  oGet4:Enable()
  oGet5:Enable()
  oGet6:Enable()
+ oGet14:Enable()
+ oAmdBtn:Enable()
 return nil
 
 Function NVIDIA_Disable()
@@ -375,11 +382,11 @@ dbgotop()
   Overclock->T4:=Overclock->P4
   Overclock->T5:=Overclock->P5
   Overclock->T6:=Overclock->P6
-   dbselectarea(2)
-   dbrlock()
-   Devices->NUM0:=Devices->NUM
-   dbunlock()
-   dbselectarea(3)
+//   dbselectarea(2)
+//   dbrlock()
+//   Devices->NUM0:=Devices->NUM
+//   dbunlock()
+//   dbselectarea(3)
   Overclock->T8:=Overclock->P8
   Overclock->T9:=Overclock->P9
   Overclock->T10:=Overclock->P10
@@ -414,12 +421,11 @@ dbgotop()
   Overclock->P4:=Overclock->T4
   Overclock->P5:=Overclock->T5
   Overclock->P6:=Overclock->T6
-   dbselectarea(2)
-   dbrlock()
-   Devices->NUM:=Devices->NUM0
-   dbunlock()
-   dbselectarea(3)
-
+//   dbselectarea(2)
+//   dbrlock()
+//   Devices->NUM:=Devices->NUM0
+//   dbunlock()
+//   dbselectarea(3)
 
   Overclock->P8:=Overclock->T8
   Overclock->P9:=Overclock->T9
@@ -451,14 +457,15 @@ dbgotop()
  do while eof() = .f.
 
   if at("GPU#", Overclock33->DEVID) <> 0
-   cDEVID:=alltrim(str(Devices->NUM))
    cMINER:=alltrim(Overclock33->MINER)
    cALGO:=alltrim(Overclock33->ALGO)
     if Overclock33->OENABLED
       if Overclock33->AMD
        cOut:=cOut +"AMD,"
+       cDEVID:=alltrim(str(Devices->NUM0))
       else
        cOut:=cOut +"NVIDIA,"
+       cDEVID:=alltrim(str(Devices->NUM))
       end if
      cOut:=cOut + cDEVID+","+cMINER+","+cALGO+","
 
@@ -575,7 +582,7 @@ select 2
      Devices->ENABLED:=aJ[1]
      Devices->UUID:=aJ[3]
      DevIDGPU++
-     Devices->NUM:=DevIDGPU
+     Devices->NUM0:=DevIDGPU
      Devices->DEVID:="GPU#"+alltrim(str(DevIDGPU))
      Devices->AMD:=.t.
      Devices->NVIDIA:=.f.
@@ -591,7 +598,7 @@ select 2
      Devices->NUM:=DevIDGPU
      Devices->DEVID:="GPU#"+alltrim(str(DevIDGPU))
      Devices->NVIDIA:=.t.
-     Devices->AMD:=.t.
+     Devices->AMD:=.f.
     end if
    end if
 
@@ -600,6 +607,7 @@ select 2
 
 end if
 next
+
 
 if confError
  msgStop("LastDevicesSettup error","Error!")
