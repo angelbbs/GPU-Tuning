@@ -15,4 +15,5 @@
 #define IDC_EDIT10                              40012
 #define IDC_EDIT11                              40013
 #define IDC_EDIT12                              40014
+#define IDC_EDIT14                              40015
 #define IDC_CHECKBOX2                           40016

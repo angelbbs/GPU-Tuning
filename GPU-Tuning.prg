@@ -192,9 +192,12 @@ nGet13:=Overclock->P13
  REDEFINE GET oGet11 VAR nGET11 ID IDC_EDIT6 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T11:=nGET11, dbunlock(), AlgoLbx:Refresh(), .t.)
  REDEFINE GET oGet12 VAR nGET12 ID IDC_EDIT4 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T12:=nGET12, dbunlock(), AlgoLbx:Refresh(), .t.)
  REDEFINE GET oGet13 VAR nGET13 ID IDC_EDIT5 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T13:=nGET13, dbunlock(), AlgoLbx:Refresh(), .t.)
-
+//amd spinner
  REDEFINE GET oGet14 VAR nGET14 ID IDC_EDIT13 PICTURE "9" SPINNER MIN 0 MAX 9;
   UPDATE ON CHANGE (dbselectarea(2), dbrlock(), Devices->NUM0:=nGET14, dbunlock(), DevicesLbx:Refresh(), .t.)
+//nvidia spinner
+ REDEFINE GET oGet15 VAR nGET15 ID IDC_EDIT14 PICTURE "9" SPINNER MIN 0 MAX 9;
+  UPDATE ON CHANGE (dbselectarea(2), dbrlock(), Devices->NUM:=nGET15, dbunlock(), DevicesLbx:Refresh(), .t.)
 
 select 2
 dbsetorder(3)
@@ -276,6 +279,7 @@ select 3
            HEADER "Fan" SIZE 30 PICTURE "@Z 9999"
 
  REDEFINE BUTTON oAmdBtn ID 10 OF oMainDlg ACTION GetCurrentAMD()
+ REDEFINE BUTTON oNvidiaBtn ID 11 OF oMainDlg ACTION GetCurrentNVIDIA()
 
 
  iif(Overclock->AMD .and. !Overclock->NVIDIA, (AMD_Enable(), NVIDIA_Disable()), )
@@ -283,7 +287,7 @@ select 3
  iif(!Overclock->AMD .and. !Overclock->NVIDIA, (AMD_Disable(), NVIDIA_Disable()), ) //cpu
 
 
-DevicesLbx:bChange:={|| (AlgoLbx:UpStable(), ChangeAlgos(), iif(Devices->NVIDIA == .t., ,nGet14:=Devices->NUM0), oGet14:Refresh(), AlgoLbx:UpStable() )};
+DevicesLbx:bChange:={|| (AlgoLbx:UpStable(), ChangeAlgos(), iif(Devices->NVIDIA == .t., nGet15:=Devices->NUM,nGet14:=Devices->NUM0), oGet14:Refresh(), oGet15:Refresh(), AlgoLbx:UpStable() )};
 
 AlgoLbx:nClrPane      = { || iif(Overclock->OENABLE0=.t.,CLR_HGREEN2,CLR_HGRAY2) }
 
@@ -294,6 +298,7 @@ AlgoLbx:bChange:={| nRow, nCol | ( nGet1:=Overclock->T1, oGet1:Refresh(),;
                      nGet5:=Overclock->T5, oGet5:Refresh(),;
                      nGet6:=Overclock->T6, oGet6:Refresh(),;
                      nGet14:=Devices->NUM0, oGet14:Refresh(),;
+                     nGet15:=Devices->NUM, oGet15:Refresh(),;
                      nGet8:=Overclock->T8, oGet8:Refresh(),;
                      nGet9:=Overclock->T9, oGet9:Refresh(),;
                      nGet10:=Overclock->T10, oGet10:Refresh(),;
@@ -335,6 +340,7 @@ Function AMD_Disable()
  oGet6:Disable()
  oGet14:Disable()
  oAmdBtn:Disable()
+ oNvidiaBtn:Enable()
 return nil
 
 Function AMD_Enable()
@@ -346,6 +352,7 @@ Function AMD_Enable()
  oGet6:Enable()
  oGet14:Enable()
  oAmdBtn:Enable()
+ oNvidiaBtn:Disable()
 return nil
 
 Function NVIDIA_Disable()
@@ -355,6 +362,7 @@ Function NVIDIA_Disable()
  oGet11:Disable()
  oGet12:Disable()
  oGet13:Disable()
+ oGet15:Disable()
 return nil
 
 Function NVIDIA_Enable()
@@ -364,6 +372,7 @@ Function NVIDIA_Enable()
  oGet11:Enable()
  oGet12:Enable()
  oGet13:Enable()
+ oGet15:Enable()
 return nil
 
 
@@ -407,10 +416,15 @@ oldRec:=recno()
 dbgotop()
 
  do while eof() = .f.
-   if  Overclock->OENABLE0 .and. Overclock->T1+Overclock->T2+Overclock->T3+Overclock->T4+Overclock->T5+Overclock->T6 = 0
-    msgStop(alltrim(Overclock->NAME)+" - "+alltrim(Overclock->ALGO)+" all parameters set to zero"+CRLF;
+   if  Overclock->AMD .and. Overclock->OENABLE0 .and. Overclock->T1+Overclock->T2+Overclock->T3+Overclock->T4+Overclock->T5+Overclock->T6 = 0
+    msgStop(alltrim(Overclock->NAME)+" - "+alltrim(Overclock->ALGO)+" all parameters set to zero!"+CRLF;
     , "Warning!")
    end if
+   if  Overclock->NVIDIA .and. Overclock->OENABLE0 .and. Overclock->T8+Overclock->T9+Overclock->T10+Overclock->T11+Overclock->T12+Overclock->T13 = 0
+    msgStop(alltrim(Overclock->NAME)+" - "+alltrim(Overclock->ALGO)+" all parameters set to zero!"+CRLF;
+    , "Warning!")
+   end if
+
   dbrlock()
   Overclock->OENABLED:=Overclock->OENABLE0
   Overclock->OVISIBLE:=Overclock->OVISIBL0
@@ -459,7 +473,10 @@ dbgotop()
   if at("GPU#", Overclock33->DEVID) <> 0
    cMINER:=alltrim(Overclock33->MINER)
    cALGO:=alltrim(Overclock33->ALGO)
-    if Overclock33->OENABLED
+    if (Overclock33->OENABLED .and. (Overclock33->P1+Overclock33->P2+Overclock33->P3+;
+       Overclock33->P4+Overclock33->P5+Overclock33->P6 <> 0) .or.;
+       (Overclock33->P8+Overclock33->P9+Overclock33->P10+Overclock33->P11+;
+       Overclock33->P12+Overclock33->P13 <> 0) )
       if Overclock33->AMD
        cOut:=cOut +"AMD,"
        cDEVID:=alltrim(str(Devices->NUM0))
@@ -575,7 +592,7 @@ select 2
 //     Devices->AMD:=.f.
 //     Devices->NVIDIA:=.f.
    end if
-   if at("PCI_",aJ[3]) !=0 //AMD
+   if at("PCI_",aJ[3]) !=0 //AMD PCI_
     if !dbseek(aJ[3])
      dbappend()
      Devices->NAME:=aJ[2]
@@ -588,7 +605,7 @@ select 2
      Devices->NVIDIA:=.f.
     end if
    end if
-   if at("GPU-",aJ[3]) !=0 //NVIDIA
+   if at("GPU-",aJ[3]) !=0 //NVIDIA GPU-
     if !dbseek(aJ[3])
      dbappend()
      Devices->NAME:=aJ[2]

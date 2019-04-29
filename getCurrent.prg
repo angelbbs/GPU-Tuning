@@ -142,3 +142,72 @@ dbrlock()
 dbunlock()
 
 return nil
+
+//*************************************************************************
+Function GetCurrentNVIDIA()
+   LOCAL hIn, hOut, hErr
+   LOCAL cData, hProc, nLen
+   cData := Space( 131072 )
+   cErr := Space( 131072 )
+
+cProgOut:=""
+cSend:=""
+ferase("nvidia-smi.log")
+
+__CopyFile( "C:\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe", "utils\nvidia-smi.exe" )
+nErr=waitrun("utils\\nvidia-smi.exe --query -f nvidia-smi.log", 0)
+if nErr <> 0
+  msgStop("Error code "+alltrim(str(nErr))+" nvidia-smi.exe", "Error!")
+  return nil
+end if
+
+cData = memoread("nvidia-smi.log")
+
+cData1:=alltrim(cData)
+if len(alltrim(cData1)) < 1
+ msgStop("Error reading from NVSMI", "Error!")
+end if
+
+nPL:=0
+cUUID:=""
+select 2
+
+  kLine=mlcount(cData1)
+for nLine=1 to kLine
+   cLine=memoline(cData1,128, nLine)
+   if at("GPU UUID", cLine) <> 0
+      c1=at(":", cLine)
+      cUUID:=right(cLine, len(cLine)-c1)
+    end if
+ if alltrim(devices->UUID) = alltrim(cUUID)
+
+    if at("Default Power Limit", cLine) <> 0
+      c1=at(":", cLine)
+      cDefPL:=right(cLine, len(cLine)-c1)
+    end if
+    if at("Enforced Power Limit", cLine) <> 0
+//?devices->UUID, UUID, devices->NAME
+      c1=at(":", cLine)
+      cEnfPL:=right(cLine, len(cLine)-c1)
+//      ?cEnfPL
+      if val(cEnfPL)<>0 .and. val(cDefPL)<>0
+       nPL=val(cEnfPL)/val(cDefPL)*100
+          nGet10:=nPL
+          oGet10:VarPut(nGet10)
+          oGet10:Refresh()
+          AlgoLbx:Refresh()
+          select 3
+          dbrlock()
+           Overclock->T10:=nPL
+          dbunlock()
+          select 2
+      end if
+    end if
+ end if
+
+
+
+next
+
+//**************************
+return nil
