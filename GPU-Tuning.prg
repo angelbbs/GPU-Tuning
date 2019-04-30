@@ -89,6 +89,8 @@ local nGet13:=0
 local nGet14:=0
 local nGet15:=0
 local nGet16:=0
+public lVisible
+public lReset
 
 public AlgoLbx
 
@@ -101,6 +103,19 @@ REQUEST DESCEND
 aMinersNames:={} //for dublicates
 
 init()
+
+oIni:=TIni():New("configs\GPU-Tuning.ini")
+
+if upper(oIni:Get( "main", "Visible" )) == ".T."
+ lVisible:=.t.
+else
+ lVisible:=.f.
+end if
+if upper(oIni:Get( "main", "Reset" )) == ".T."
+ lReset:=.t.
+else
+ lReset:=.f.
+end if
 
 if !file("configs/general.json")
  msgstop("stop","Error")
@@ -199,6 +214,16 @@ nGet13:=Overclock->P13
  REDEFINE GET oGet15 VAR nGET15 ID IDC_EDIT14 PICTURE "9" SPINNER MIN 0 MAX 9;
   UPDATE ON CHANGE (dbselectarea(2), dbrlock(), Devices->NUM:=nGET15, dbunlock(), DevicesLbx:Refresh(), .t.)
 
+ REDEFINE CHECKBOX oVisible VAR lVisible ID 20
+// ON CHANGE;
+//    (dbselectarea(2), dbrlock(), devices->VISIBLE0:=lVisible, dbunlock(), dbselectarea(2))
+ REDEFINE CHECKBOX oReset VAR lReset ID 21
+// ON CHANGE;
+//    (dbselectarea(2), dbrlock(), devices->RESET0:=lReset, dbunlock(), dbselectarea(2))
+//oVisible:SetCheck(lVisible)
+//oReset:SetCheck(lReset)
+
+
 select 2
 dbsetorder(3)
 dbgotop()
@@ -287,7 +312,13 @@ select 3
  iif(!Overclock->AMD .and. !Overclock->NVIDIA, (AMD_Disable(), NVIDIA_Disable()), ) //cpu
 
 
-DevicesLbx:bChange:={|| (AlgoLbx:UpStable(), ChangeAlgos(), iif(Devices->NVIDIA == .t., nGet15:=Devices->NUM,nGet14:=Devices->NUM0), oGet14:Refresh(), oGet15:Refresh(), AlgoLbx:UpStable() )};
+DevicesLbx:bChange:={|| (AlgoLbx:UpStable(), ChangeAlgos(),;
+  iif(Devices->NVIDIA == .t., nGet15:=Devices->NUM,nGet14:=Devices->NUM0),;
+   oGet14:Refresh(), oGet15:Refresh(), AlgoLbx:UpStable() )}
+//   lVisible:=devices->VISIBLE0, oVisible:SetCheck(lVisible),;
+//   lReset:=devices->RESET0, oReset:SetCheck(lReset) )}
+
+
 
 AlgoLbx:nClrPane      = { || iif(Overclock->OENABLE0=.t.,CLR_HGREEN2,CLR_HGRAY2) }
 
@@ -317,6 +348,8 @@ AlgoLbx:bChange:={| nRow, nCol | ( nGet1:=Overclock->T1, oGet1:Refresh(),;
 select 2
 
 DevicesLbx:SetFocus()
+DevicesLbx:Upstable()
+
 
 // REDEFINE BUTTON oAmdBtn ID 10 OF oMainDlg ACTION GetCurrentAMD()
 
@@ -377,6 +410,21 @@ return nil
 
 
 Function LoadOverClockData()
+
+//select 2
+//SET FILTER TO
+//dbgotop()
+// do while eof() = .f.
+//  dbrlock()
+//  Devices->VISIBLE0:=Devices->VISIBLE
+//  Devices->RESET0:=Devices->RESET
+//  dbunlock()
+// dbskip()
+// end do
+//dbgotop()
+
+
+
 select 3
 SET FILTER TO
 dbgotop()
@@ -411,6 +459,23 @@ dbgotop()
 return nil
 
 Function SaveOverClockData()
+//select 2
+//SET FILTER TO
+//dbgotop()
+// do while eof() = .f.
+//  dbrlock()
+//  Devices->VISIBLE:=Devices->VISIBLE0
+//  Devices->RESET:=Devices->RESET0
+//  dbunlock()
+// dbskip()
+// end do
+//dbgotop()
+
+ oIni:Set( "main", "Visible", lVisible )
+ oIni:Set( "main", "Reset", lReset )
+
+
+
 select 3
 oldRec:=recno()
 dbgotop()
@@ -450,6 +515,28 @@ dbgotop()
   dbunlock()
  dbskip()
  end do
+
+cScrypt:=memoread("GPU-Scrypt.cmd")
+if lVisible=.f.
+ cScrypt:=strtran(cScrypt,"SET NOVISIBLE=FALSE", "SET NOVISIBLE=TRUE")
+else
+ cScrypt:=strtran(cScrypt,"SET NOVISIBLE=TRUE", "SET NOVISIBLE=FALSE")
+end if
+memowrit("GPU-Scrypt.cmd", cScrypt, .f.)
+
+cReset:=memoread("GPU-Reset.cmd")
+if lVisible=.f.
+ cReset:=strtran(cReset,"SET NOVISIBLE=FALSE", "SET NOVISIBLE=TRUE")
+else
+ cReset:=strtran(cReset,"SET NOVISIBLE=TRUE", "SET NOVISIBLE=FALSE")
+end if
+if lReset=.t.
+ cReset:=strtran(cReset,"SET RUN=FALSE", "SET RUN=TRUE")
+else
+ cReset:=strtran(cReset,"SET RUN=TRUE", "SET RUN=FALSE")
+end if
+memowrit("GPU-Reset.cmd", cReset, .f.)
+
 
  SaveIniFile()
  select 3

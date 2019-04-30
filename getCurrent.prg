@@ -195,10 +195,21 @@ for nLine=1 to kLine
           nGet10:=nPL
           oGet10:VarPut(nGet10)
           oGet10:Refresh()
+
+          nGet12:=75
+          oGet12:VarPut(nGet12)
+          oGet12:Refresh()
+
+          nGet13:=-1
+          oGet13:VarPut(nGet13)
+          oGet13:Refresh()
+
           AlgoLbx:Refresh()
           select 3
           dbrlock()
            Overclock->T10:=nPL
+           Overclock->T12:=75
+           Overclock->T13:=-1
           dbunlock()
           select 2
       end if
