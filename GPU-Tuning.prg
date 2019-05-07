@@ -164,6 +164,7 @@ Select 3
 end if
 
   define font oFont name "Tahoma" size 0,-12
+  define font oFont2 name "Tahoma" size 0,-18
 
 
 LoadOverClockData()
@@ -190,7 +191,9 @@ nGet11:=Overclock->P11
 nGet12:=Overclock->P12
 nGet13:=Overclock->P13
 
+cSay1:="Warning! Overclock may DAMAGE GPU!"
  DEFINE DIALOG oMainDlg RESOURCE "IDD_DIALOG1" TITLE "GPU-Tuning"
+ REDEFINE SAY oSay1 VAR cSay1 ID 23 COLOR CLR_HRED FONT oFont2
  REDEFINE GET oGet1 VAR nGET1 ID IDC_EDIT7 PICTURE "@Z 9999" UPDATE;
  VALID (dbselectarea(3), dbrlock(), Overclock->T1:=nGET1, dbunlock(), AlgoLbx:Refresh(), .t.)
 
@@ -566,12 +569,14 @@ dbgotop()
        Overclock33->P12+Overclock33->P13 <> 0) )
       if Overclock33->AMD
        cOut:=cOut +"AMD,"
-       cDEVID:=alltrim(str(Devices->NUM0))
+       cDEVNUM:=alltrim(str(Devices->NUM0))
+       cDEVID:=strtran(alltrim(Devices->DEVID), "GPU#", "")
       else
        cOut:=cOut +"NVIDIA,"
-       cDEVID:=alltrim(str(Devices->NUM))
+       cDEVID:=strtran(alltrim(Devices->DEVID), "GPU#", "")
+       cDEVNUM:=alltrim(str(Devices->NUM))
       end if
-     cOut:=cOut + cDEVID+","+cMINER+","+cALGO+","
+     cOut:=cOut + cDEVID+","+cDEVNUM+","+cMINER+","+cALGO+","
 
       if Overclock33->AMD
        cOut:=cOut+alltrim(str(Overclock33->P1))+",";
@@ -594,7 +599,7 @@ dbgotop()
  dbskip()
  end do
 
-memowrit("overclock.cfg", cOut, .f.)
+memowrit("configs\overclock.cfg", cOut, .f.)
 select 3
 
 return nil
