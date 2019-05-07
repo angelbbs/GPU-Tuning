@@ -196,6 +196,9 @@ nGet8:=Overclock->P8
 nGet9:=Overclock->P9
 nGet10:=Overclock->P10
 nGet11:=Overclock->P11
+if nGet11 == 0
+ nGet11:=-1
+end if
 nGet12:=Overclock->P12
 nGet13:=Overclock->P13
 
@@ -477,6 +480,9 @@ dbgotop()
   Overclock->T9:=Overclock->P9
   Overclock->T10:=Overclock->P10
   Overclock->T11:=Overclock->P11
+if Overclock->P11 ==0
+ Overclock->T11:=-1
+end if
   Overclock->T12:=Overclock->P12
   Overclock->T13:=Overclock->P13
   dbunlock()
@@ -540,6 +546,10 @@ dbgotop()
   Overclock->P9:=Overclock->T9
   Overclock->P10:=Overclock->T10
   Overclock->P11:=Overclock->T11
+if Overclock->T11 ==0
+ Overclock->P11:=-1
+end if
+
   Overclock->P12:=Overclock->T12
   Overclock->P13:=Overclock->T13
   dbunlock()
@@ -622,11 +632,20 @@ dbgotop()
      cMINER:=alltrim(Overclock33->MINER)
      cALGO:=alltrim(Overclock33->ALGO)
      cOut:=cOut + cDEVID+","+cDEVNUM+","+cMINER+","+cALGO+","
+if Overclock->P11 ==0
+ Overclock->P11:=-1
+end if
+
+if Overclock33->P11==-1
+ cVolt:=alltrim(str(Overclock33->P11))+","
+else
+ cVolt:=alltrim(str(Overclock33->P11*1000))+","
+end if
 
        cOut:=cOut+alltrim(str(Overclock33->P8))+",";
                  +alltrim(str(Overclock33->P9))+",";
                  +alltrim(str(Overclock33->P10))+",";
-                 +alltrim(str(Overclock33->P11*1000))+",";
+                 +cVolt;
                  +alltrim(str(Overclock33->P12))+",";
                  +alltrim(str(Overclock33->P13))+CRLF
       end if
