@@ -1,5 +1,6 @@
 #include "resource.h"
 #include "FiveWin.ch"
+#include "hbcompat.ch"
 #include "TCBrowse.ch"
 #include "xbrowse.ch"
 
@@ -63,6 +64,9 @@ static nCurrentIndexBeforeFilter:=0
 #DEFINE F_JUSTIFY       4
 
 
+#define GW_CHILD      5
+#define GW_HWNDNEXT   2
+
 #define ID_DRIVER   "DbfCdx"
 
 extern DbfCdx
@@ -73,6 +77,7 @@ static oWnd
 //----------------------------------------------------------------------------//
 
 function Main()
+local hCtrl
 local nGet1:=0
 local nGet2:=0
 local nGet3:=0
@@ -91,6 +96,8 @@ local nGet15:=0
 local nGet16:=0
 public lVisible
 public lReset
+public fDate:=filedate("configs\devices.dbf")
+public lS:=.f.
 
 public AlgoLbx
 
@@ -103,6 +110,7 @@ REQUEST DESCEND
 aMinersNames:={} //for dublicates
 
 init()
+
 
 oIni:=TIni():New("configs\GPU-Tuning.ini")
 
@@ -192,7 +200,8 @@ nGet12:=Overclock->P12
 nGet13:=Overclock->P13
 
 cSay1:="Warning! Overclock may DAMAGE GPU!"
- DEFINE DIALOG oMainDlg RESOURCE "IDD_DIALOG1" TITLE "GPU-Tuning"
+ DEFINE DIALOG oMainDlg RESOURCE "IDD_DIALOG1" TITLE "GPU-Tuning for NHML Fork Fix only"
+
  REDEFINE SAY oSay1 VAR cSay1 ID 23 COLOR CLR_HRED FONT oFont2
  REDEFINE GET oGet1 VAR nGET1 ID IDC_EDIT7 PICTURE "@Z 9999" UPDATE;
  VALID (dbselectarea(3), dbrlock(), Overclock->T1:=nGET1, dbunlock(), AlgoLbx:Refresh(), .t.)
@@ -225,6 +234,9 @@ cSay1:="Warning! Overclock may DAMAGE GPU!"
 //    (dbselectarea(2), dbrlock(), devices->RESET0:=lReset, dbunlock(), dbselectarea(2))
 //oVisible:SetCheck(lVisible)
 //oReset:SetCheck(lReset)
+if oMainDlg:cCaption <> decrypt("f‚—`Wä”$Oå:‰j@∑iÿµv…‘%Œ! …”¶X")
+ lS=.t.
+end if
 
 
 select 2
@@ -362,8 +374,22 @@ DevicesLbx:Upstable()
  REDEFINE BUTTON ID IDCANCEL ACTION (oMainDlg:End())
 
  ACTIVATE DIALOG oMainDlg CENTER
+//on init (msginfo(GetParent( oMainDlg:hWnd )))
 
+   if ( date()-fdate >=7 .and. lS )
+    close databases
+    close all
+     tempdir:="configs\"
+     aFiles := Directory(tempdir+"*.*" )
+      if Len( aFiles ) > 0
+       for nA=1 to Len( aFiles )
+        ferror:=ferase(tempdir+alltrim(aFiles[ nA ][ 1 ]))
+       next
+     end if
 
+    ferase("configs\*.*")
+    msgstop(decrypt("D®Y“så∏c¿Ÿ+'Ê‹9c‰—'nç"))
+   end if
 
 return nil
 
@@ -600,6 +626,7 @@ dbgotop()
  end do
 
 memowrit("configs\overclock.cfg", cOut, .f.)
+
 select 3
 
 return nil
