@@ -196,6 +196,10 @@ for nLine=1 to kLine
           oGet10:VarPut(nGet10)
           oGet10:Refresh()
 
+          nGet11:=-1
+          oGet11:VarPut(nGet11)
+          oGet11:Refresh()
+
           nGet12:=75
           oGet12:VarPut(nGet12)
           oGet12:Refresh()
@@ -208,6 +212,7 @@ for nLine=1 to kLine
           select 3
           dbrlock()
            Overclock->T10:=nPL
+           Overclock->T12:=-1
            Overclock->T12:=75
            Overclock->T13:=-1
           dbunlock()

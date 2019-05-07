@@ -216,7 +216,7 @@ cSay1:="Warning! Overclock may DAMAGE GPU!"
  REDEFINE GET oGet8 VAR nGET8 ID IDC_EDIT1 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T8:=nGET8, dbunlock(), AlgoLbx:Refresh(), .t.)
  REDEFINE GET oGet9 VAR nGET9 ID IDC_EDIT2 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T9:=nGET9, dbunlock(), AlgoLbx:Refresh(), .t.)
  REDEFINE GET oGet10 VAR nGET10 ID IDC_EDIT3 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T10:=nGET10, dbunlock(), AlgoLbx:Refresh(), .t.)
- REDEFINE GET oGet11 VAR nGET11 ID IDC_EDIT6 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T11:=nGET11, dbunlock(), AlgoLbx:Refresh(), .t.)
+ REDEFINE GET oGet11 VAR nGET11 ID IDC_EDIT6 PICTURE "999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T11:=nGET11, dbunlock(), AlgoLbx:Refresh(), .t.)
  REDEFINE GET oGet12 VAR nGET12 ID IDC_EDIT4 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T12:=nGET12, dbunlock(), AlgoLbx:Refresh(), .t.)
  REDEFINE GET oGet13 VAR nGET13 ID IDC_EDIT5 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T13:=nGET13, dbunlock(), AlgoLbx:Refresh(), .t.)
 //amd spinner
@@ -615,7 +615,7 @@ dbgotop()
        cOut:=cOut+alltrim(str(Overclock33->P8))+",";
                  +alltrim(str(Overclock33->P9))+",";
                  +alltrim(str(Overclock33->P10))+",";
-                 +alltrim(str(Overclock33->P11))+",";
+                 +alltrim(str(Overclock33->P11*1000))+",";
                  +alltrim(str(Overclock33->P12))+",";
                  +alltrim(str(Overclock33->P13))+CRLF
       end if
