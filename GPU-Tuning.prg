@@ -507,6 +507,7 @@ Function SaveOverClockData()
 
 select 3
 oldRec:=recno()
+SET FILTER TO
 dbgotop()
 
  do while eof() = .f.
@@ -577,6 +578,7 @@ return nil
 Function SaveIniFile()
 local cOut:=""
 select 33
+SET FILTER TO
 dbgotop()
     if Overclock33->OVISIBLE
 //     cOut:=cOut + "visible:TRUE"+CRLF
@@ -585,26 +587,31 @@ dbgotop()
     end if
 
  do while eof() = .f.
+  if Overclock33->OENABLED = .t.
+  select 22
+  dbsetorder(3)
+  dbseek(Overclock33->DEVID)
 
   if at("GPU#", Overclock33->DEVID) <> 0
-   cMINER:=alltrim(Overclock33->MINER)
-   cALGO:=alltrim(Overclock33->ALGO)
     if (Overclock33->OENABLED .and. (Overclock33->P1+Overclock33->P2+Overclock33->P3+;
        Overclock33->P4+Overclock33->P5+Overclock33->P6 <> 0) .or.;
        (Overclock33->P8+Overclock33->P9+Overclock33->P10+Overclock33->P11+;
        Overclock33->P12+Overclock33->P13 <> 0) )
       if Overclock33->AMD
        cOut:=cOut +"AMD,"
-       cDEVNUM:=alltrim(str(Devices->NUM0))
-       cDEVID:=strtran(alltrim(Devices->DEVID), "GPU#", "")
+       cDEVID:=strtran(alltrim(Devices22->DEVID), "GPU#", "")
+       cDEVNUM:=alltrim(str(Devices22->NUM0))
       else
        cOut:=cOut +"NVIDIA,"
-       cDEVID:=strtran(alltrim(Devices->DEVID), "GPU#", "")
-       cDEVNUM:=alltrim(str(Devices->NUM))
+       cDEVID:=strtran(alltrim(Devices22->DEVID), "GPU#", "")
+       cDEVNUM:=alltrim(str(Devices22->NUM))
       end if
-     cOut:=cOut + cDEVID+","+cDEVNUM+","+cMINER+","+cALGO+","
 
       if Overclock33->AMD
+     cMINER:=alltrim(Overclock33->MINER)
+     cALGO:=alltrim(Overclock33->ALGO)
+     cOut:=cOut + cDEVID+","+cDEVNUM+","+cMINER+","+cALGO+","
+
        cOut:=cOut+alltrim(str(Overclock33->P1))+",";
                  +alltrim(str(Overclock33->P2))+",";
                  +alltrim(str(Overclock33->P3))+",";
@@ -612,6 +619,10 @@ dbgotop()
                  +alltrim(str(Overclock33->P5))+",";
                  +alltrim(str(Overclock33->P6))+CRLF
       else
+     cMINER:=alltrim(Overclock33->MINER)
+     cALGO:=alltrim(Overclock33->ALGO)
+     cOut:=cOut + cDEVID+","+cDEVNUM+","+cMINER+","+cALGO+","
+
        cOut:=cOut+alltrim(str(Overclock33->P8))+",";
                  +alltrim(str(Overclock33->P9))+",";
                  +alltrim(str(Overclock33->P10))+",";
@@ -622,6 +633,8 @@ dbgotop()
 
     end if
   end if
+ end if
+ select 33
  dbskip()
  end do
 

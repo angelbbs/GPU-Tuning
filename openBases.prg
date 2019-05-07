@@ -26,6 +26,16 @@ use Devices SHARED  ALIAS "Devices"
 set index to uuid2, name2, devid2
 dbsetorder(1)
 
+select 22
+use Devices SHARED  ALIAS "Devices22"
+// PASSWORD cPass4BD
+ index on UUID to uuid22
+ index on NAME to name22
+ index on DEVID to devid22
+set index to uuid22, name22, devid22
+dbsetorder(1)
+
+
 select 3
 use Overclock SHARED ALIAS "Overclock"
 // PASSWORD cPass4BD
