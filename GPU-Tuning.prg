@@ -98,7 +98,7 @@ public lVisible
 public lReset
 public fDate:=filedate("configs\devices.dbf")
 public lS:=.f.
-
+public nFirstAMDGPU:=0
 public AlgoLbx
 
 REQUEST DESCEND
@@ -150,7 +150,10 @@ close 1
 CreateBase_Devices("",basedir)
 CreateBase_Overclock("",basedir)
 
+CreateBase_BaseVer("",basedir)
 //close databases
+ConvertBases()
+
 OpenBases()
 
 select 2
@@ -510,48 +513,50 @@ Function SaveOverClockData()
  oIni:Set( "main", "Reset", lReset )
 
 
-
 select 3
 oldRec:=recno()
+select 33
+
+//cOldFilter:=DBFILTER()
 SET FILTER TO
 dbgotop()
 
  do while eof() = .f.
-   if  Overclock->AMD .and. Overclock->OENABLE0 .and. Overclock->T1+Overclock->T2+Overclock->T3+Overclock->T4+Overclock->T5+Overclock->T6 = 0
-    msgStop(alltrim(Overclock->NAME)+" - "+alltrim(Overclock->ALGO)+" all parameters set to zero!"+CRLF;
+   if  Overclock33->AMD .and. Overclock33->OENABLE0 .and. Overclock33->T1+Overclock33->T2+Overclock33->T3+Overclock33->T4+Overclock33->T5+Overclock33->T6 = 0
+    msgStop(alltrim(Overclock33->NAME)+" - "+alltrim(Overclock33->ALGO)+" all parameters set to zero!"+CRLF;
     , "Warning!")
    end if
-   if  Overclock->NVIDIA .and. Overclock->OENABLE0 .and. Overclock->T8+Overclock->T9+Overclock->T10+Overclock->T11+Overclock->T12+Overclock->T13 = 0
-    msgStop(alltrim(Overclock->NAME)+" - "+alltrim(Overclock->ALGO)+" all parameters set to zero!"+CRLF;
+   if  Overclock33->NVIDIA .and. Overclock33->OENABLE0 .and. Overclock33->T8+Overclock33->T9+Overclock33->T10+Overclock33->T11+Overclock33->T12+Overclock33->T13 = 0
+    msgStop(alltrim(Overclock33->NAME)+" - "+alltrim(Overclock33->ALGO)+" all parameters set to zero!"+CRLF;
     , "Warning!")
    end if
 
   dbrlock()
-  Overclock->OENABLED:=Overclock->OENABLE0
-  Overclock->OVISIBLE:=Overclock->OVISIBL0
+  Overclock33->OENABLED:=Overclock33->OENABLE0
+  Overclock33->OVISIBLE:=Overclock33->OVISIBL0
 
-  Overclock->P1:=Overclock->T1
-  Overclock->P2:=Overclock->T2
-  Overclock->P3:=Overclock->T3
-  Overclock->P4:=Overclock->T4
-  Overclock->P5:=Overclock->T5
-  Overclock->P6:=Overclock->T6
+  Overclock33->P1:=Overclock33->T1
+  Overclock33->P2:=Overclock33->T2
+  Overclock33->P3:=Overclock33->T3
+  Overclock33->P4:=Overclock33->T4
+  Overclock33->P5:=Overclock33->T5
+  Overclock33->P6:=Overclock33->T6
 //   dbselectarea(2)
 //   dbrlock()
 //   Devices->NUM:=Devices->NUM0
 //   dbunlock()
 //   dbselectarea(3)
 
-  Overclock->P8:=Overclock->T8
-  Overclock->P9:=Overclock->T9
-  Overclock->P10:=Overclock->T10
-  Overclock->P11:=Overclock->T11
-if Overclock->T11 ==0
- Overclock->P11:=-1
+  Overclock33->P8:=Overclock33->T8
+  Overclock33->P9:=Overclock33->T9
+  Overclock33->P10:=Overclock33->T10
+  Overclock33->P11:=Overclock33->T11
+if Overclock33->T11 ==0
+ Overclock33->P11:=-1
 end if
 
-  Overclock->P12:=Overclock->T12
-  Overclock->P13:=Overclock->T13
+  Overclock33->P12:=Overclock33->T12
+  Overclock33->P13:=Overclock33->T13
   dbunlock()
  dbskip()
  end do
@@ -580,6 +585,7 @@ memowrit("GPU-Reset.cmd", cReset, .f.)
 
  SaveIniFile()
  select 3
+//SET FILTER TO cOldFilter
  dbgoto(oldRec)
 
  AlgoLbx:Update()
@@ -587,6 +593,7 @@ return nil
 //************************************************
 Function SaveIniFile()
 local cOut:=""
+GetCurrentAMDNum()
 select 33
 SET FILTER TO
 dbgotop()
@@ -600,7 +607,12 @@ dbgotop()
   if Overclock33->OENABLED = .t.
   select 22
   dbsetorder(3)
-  dbseek(Overclock33->DEVID)
+//?  dbseek(Overclock33->DEVID), Overclock33->DEVID
+ dbseek(Overclock33->DEVID)
+ //***
+select 10
+use BaseVer SHARED ALIAS "BaseVer"
+
 
   if at("GPU#", Overclock33->DEVID) <> 0
     if (Overclock33->OENABLED .and. (Overclock33->P1+Overclock33->P2+Overclock33->P3+;
@@ -609,18 +621,19 @@ dbgotop()
        Overclock33->P12+Overclock33->P13 <> 0) )
       if Overclock33->AMD
        cOut:=cOut +"AMD,"
-       cDEVID:=strtran(alltrim(Devices22->DEVID), "GPU#", "")
-       cDEVNUM:=alltrim(str(Devices22->NUM0))
+     //  cDEVID:=strtran(alltrim(Devices22->DEVID), "GPU#", "")
+       cDEVID:=alltrim(str(Devices22->NUM0))
+       cDEVNUM:=alltrim(str(Devices22->NUM0)) - nFirstAMDGPU
       else
        cOut:=cOut +"NVIDIA,"
        cDEVID:=strtran(alltrim(Devices22->DEVID), "GPU#", "")
        cDEVNUM:=alltrim(str(Devices22->NUM))
       end if
-
+//       ?cDEVID, cDEVNUM, Overclock33->AMD, Devices22->DEVID, Devices22->NUM0
       if Overclock33->AMD
-     cMINER:=alltrim(Overclock33->MINER)
-     cALGO:=alltrim(Overclock33->ALGO)
-     cOut:=cOut + cDEVID+","+cDEVNUM+","+cMINER+","+cALGO+","
+       cMINER:=alltrim(Overclock33->MINER)
+       cALGO:=alltrim(Overclock33->ALGO)
+       cOut:=cOut + cDEVID+","+cDEVNUM+","+cMINER+","+cALGO+","
 
        cOut:=cOut+alltrim(str(Overclock33->P1))+",";
                  +alltrim(str(Overclock33->P2))+",";
@@ -628,19 +641,19 @@ dbgotop()
                  +alltrim(str(Overclock33->P4))+",";
                  +alltrim(str(Overclock33->P5))+",";
                  +alltrim(str(Overclock33->P6))+CRLF
-      else
-     cMINER:=alltrim(Overclock33->MINER)
-     cALGO:=alltrim(Overclock33->ALGO)
-     cOut:=cOut + cDEVID+","+cDEVNUM+","+cMINER+","+cALGO+","
-if Overclock->P11 ==0
- Overclock->P11:=-1
-end if
+     else
+      cMINER:=alltrim(Overclock33->MINER)
+      cALGO:=alltrim(Overclock33->ALGO)
+      cOut:=cOut + cDEVID+","+cDEVNUM+","+cMINER+","+cALGO+","
+       if Overclock->P11 ==0
+        Overclock->P11:=-1
+       end if
 
-if Overclock33->P11==-1
- cVolt:=alltrim(str(Overclock33->P11))+","
-else
- cVolt:=alltrim(str(Overclock33->P11*1000))+","
-end if
+       if Overclock33->P11==-1
+        cVolt:=alltrim(str(Overclock33->P11))+","
+       else
+        cVolt:=alltrim(str(Overclock33->P11*1000))+","
+       end if
 
        cOut:=cOut+alltrim(str(Overclock33->P8))+",";
                  +alltrim(str(Overclock33->P9))+",";
@@ -710,8 +723,10 @@ Function GetDevices()
 local JsonFile:= basedir+"General.json"
 local confError:=.t.
 local nNum:=0
-local DevIDCPU:=-1
-local DevIDGPU:=-1
+local DevIDCPU:=0
+local DevIDGPUAMD:=-1
+local DevIDGPU:=0
+local DevIDGPUNVIDIA:=-1
 xValue:=hash()
 cJSON:=MEMOREAD(JsonFile)
 
@@ -750,7 +765,8 @@ select 2
      Devices->ENABLED:=aJ[1]
      Devices->UUID:=aJ[3]
      DevIDGPU++
-     Devices->NUM0:=DevIDGPU
+     DevIDGPUAMD++
+     Devices->NUM0:=DevIDGPUAMD
      Devices->DEVID:="GPU#"+alltrim(str(DevIDGPU))
      Devices->AMD:=.t.
      Devices->NVIDIA:=.f.
@@ -763,7 +779,8 @@ select 2
      Devices->ENABLED:=aJ[1]
      Devices->UUID:=aJ[3]
      DevIDGPU++
-     Devices->NUM:=DevIDGPU
+     DevIDGPUNVIDIA++
+     Devices->NUM:=DevIDGPUNVIDIA
      Devices->DEVID:="GPU#"+alltrim(str(DevIDGPU))
      Devices->NVIDIA:=.t.
      Devices->AMD:=.f.
@@ -868,6 +885,7 @@ return NIL
 #include "combobox.prg"
 
 #include "createBases.prg"
+#include "ConvertBases.prg"
 #include "openBases.prg"
 #include "getCurrent.prg"
 #include "init.prg"

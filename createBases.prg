@@ -1,3 +1,16 @@
+Function CreateBase_BaseVer(cArch,pathtofile)
+DEFAULT pathtofile:=""
+DEFAULT cArch:=""
+
+if !file(pathtofile+"BaseVer"+cArch+".dbf")
+ cr_db := {}
+ AADD(cr_db, { "BASEVER", "N", 2, 0 })
+ DBCREATE((pathtofile+"BaseVer"+cArch+".dbf"), cr_db)
+end if
+
+return NIL
+
+
 Function CreateBase_Miners(cArch,pathtofile)
 DEFAULT pathtofile:=""
 DEFAULT cArch:=""

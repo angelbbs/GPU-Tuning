@@ -10,6 +10,11 @@ if Len( aFiles ) > 0
  next
 end if
 
+//***
+select 10
+use BaseVer SHARED ALIAS "BaseVer"
+
+
 select 1
 use Miners SHARED ALIAS "Miners"
 // PASSWORD cPass4BD
@@ -29,10 +34,10 @@ dbsetorder(1)
 select 22
 use Devices SHARED  ALIAS "Devices22"
 // PASSWORD cPass4BD
- index on UUID to uuid22
- index on NAME to name22
- index on DEVID to devid22
-set index to uuid22, name22, devid22
+ index on UUID to uuid2
+ index on NAME to name2
+ index on DEVID to devid2
+set index to uuid2, name2, devid2
 dbsetorder(1)
 
 
@@ -58,6 +63,10 @@ use Overclock SHARED ALIAS "Overclock33"
  index on NH_ID to id33
 set index to uuid33, name33, miner33, algo33, id33
 dbsetorder(1)
+
+
+//***
+
 return nil
 
 

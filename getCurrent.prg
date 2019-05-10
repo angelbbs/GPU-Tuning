@@ -1,3 +1,31 @@
+Function GetCurrentAMDNum()
+   LOCAL hIn, hOut, hErr
+   LOCAL cData, hProc, nLen
+   cData := Space( 4096 )
+   cErr := Space( 4096 )
+cProgOut:=""
+cSend:=""
+ cProc:="utils\OverdriveNTool.exe -getcurrent"
+   hProc := HB_OpenProcess( cProc , @hIn, @hOut, @hErr, .f.  )
+CursorWait()
+inkey(2)
+CursorArrow()
+
+//1: Radeon RX 580 Series|GPU_P0=300;750|GPU_P1=600;769|GPU_P2=918;931|GPU_P3=1167;1162|GPU_P4=1239;1150|GPU_P5=1282;1150|GPU_P6=1326;1150|Mem_P0=300;750|Mem_P1=1000;800|Mem_P2=1950;950|Fan_Min=750|Fan_Max=3000|Fan_Target=70|Fan_Acoustic=918|Power_Temp=90|Power_Target=0
+//2: Radeon RX 560 Series|GPU_P0=300;800|GPU_P1=719;1050|GPU_P2=819;1050|GPU_P3=919;1050|GPU_P4=1019;1050|GPU_P5=1119;1050|GPU_P6=1219;1050|GPU_P7=1319;1050|Mem_P0=300;800|Mem_P1=625;1050|Mem_P2=1950;850|Fan_Min=1155|Fan_Max=3000|Fan_Target=65|Fan_Acoustic=1045|Power_Temp=90|Power_Target=0
+//3: Radeon RX 560 Series|GPU_P0=214;715|GPU_P1=603;721|GPU_P2=958;812|GPU_P3=1060;893|GPU_P4=1128;962|GPU_P5=1182;1031|GPU_P6=1230;1100|GPU_P7=1319;1100|Mem_P0=300;715|Mem_P1=625;800|Mem_P2=1950;850|Fan_Min=1155|Fan_Max=3000|Fan_Target=70|Fan_Acoustic=1045|Power_Temp=90|Power_Target=0
+//4: Radeon RX 560 Series|GPU_P0=300;800|GPU_P1=719;1050|GPU_P2=819;1050|GPU_P3=919;1050|GPU_P4=1019;1050|GPU_P5=1119;1050|GPU_P6=1219;1050|GPU_P7=1319;1050|Mem_P0=300;800|Mem_P1=625;1050|Mem_P2=1950;850|Fan_Min=1155|Fan_Max=3000|Fan_Target=65|Fan_Acoustic=1045|Power_Temp=90|Power_Target=0
+
+   nLen := Fread( hOut, @cData, 4096 )
+
+cData1:=alltrim(cData)
+if len(alltrim(cData1)) < 1
+ msgStop("Error reading from OverdriveNTool.exe", "Error!")
+end if
+
+nFirstAMDGPU:=val(left(cData1,1))
+return nil
+
 Function GetCurrentAMD()
    LOCAL hIn, hOut, hErr
    LOCAL cData, hProc, nLen
@@ -23,11 +51,40 @@ if len(alltrim(cData1)) < 1
  msgStop("Error reading from OverdriveNTool.exe", "Error!")
 end if
 
-  kLine=mlcount(cData1)
-  nLine=val(strtran(OverClock->DEVID,"GPU#",""))+ 1 //нулевой строки быть не может
-   cLine=amemoline(cData1, nLine)
+//aAmd:={}
+  kLine_p=mlcount(cData1)
+//  nLine=val(strtran(Devices->DEVID,"GPU#",""))+ 1 //нулевой строки быть не может
+//   cLine=amemoline(cData1, nLine)
+//?kLine_p
+nDevID:=devices->NUM0
+lParse:=.f.
+nFirstAMDGPU:=val(left(cData1,1))
+for nLp=1 to kLine_p
+// AADD(aAmd, amemoline(cData1, nL))
+//?nLp
+ cLine=amemoline(cData1, nLp)
+//?cLine
+cGPU:=left(cLine,1) //9 GPU max
+//?left(cLine, 1), strtran(Devices->DEVID,"GPU#","")
+//?val(left(cLine, 1)), val(strtran(Devices->DEVID,"GPU#","")), nDevID, val(alltrim(cGPU))
+//  if val(left(cLine, 1)) == val(strtran(Devices->DEVID,"GPU#","")) .and. nDevID == val(alltrim(cGPU))
+  if val(left(cLine, 1)) == val(strtran(Devices->DEVID,"GPU#",""))-nFirstAMDGPU+1 //
+//  if val(left(cLine, 1)) == nDevID
+   parseAMDline(cLine)
+   lParse:=.t.
+  end if
+next
 
-    parseAMDline(cLine)
+//if nDevID <> val(alltrim(cGPU))
+if !lParse
+ msgStop("GPU#"+alltrim(str(nDevID)) + " " +alltrim(Overclock->NAME)+;
+  " not found in responce from OverdriveNTool.exe"+CRLF+;
+  "Try to change GPU number (№)" ,"Error!")
+// return nil
+end if
+
+
+//    parseAMDline(cLine)
 
    FClose( hProc )
    FClose( hIn )
@@ -50,6 +107,7 @@ local cFanAcoustic:=""
 local cPowerTemp:=""
 local cPowerTarget:=""
 
+//?"Parse:", cLine
 cGPU:=alltrim(strtran(alltrim(left(cLine,3)),":",""))
 
 cOstLine:=right(cLine, len(cLine)-3)
@@ -91,16 +149,9 @@ cOstLine2:=strtran(cOstLine, "|", CRLF)
 
 nDevID:=devices->NUM0
 
-if nDevID <> val(alltrim(cGPU))
- msgStop("GPU#"+alltrim(str(nDevID)) + " " +alltrim(Overclock->NAME)+;
-  " not found in responce from OverdriveNTool.exe"+CRLF+;
-  "Try to change GPU number (№)" ,"Error!")
- return nil
-end if
 
 if alltrim(Overclock->NAME) <> alltrim(cGPUname)
- msgStop(alltrim(Overclock->NAME) + " missmatch with " +alltrim(cGPUname)+CRLF+;
-  "Try to change GPU number (№)" ,"Error!")
+ msgStop(alltrim(Overclock->NAME) + " missmatch with " +alltrim(cGPUname)+CRLF,"Error!")
  return nil
 end if
 
