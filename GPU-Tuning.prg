@@ -593,7 +593,9 @@ return nil
 //************************************************
 Function SaveIniFile()
 local cOut:=""
-GetCurrentAMDNum()
+if checkAMD() == .t.
+ GetCurrentAMDNum()
+end if
 select 33
 SET FILTER TO
 dbgotop()
@@ -876,8 +878,6 @@ dbgotop()
 select 2
 
 return NIL
-
-
 
 //#include "resource.h"
 //#include "adbFilter.prg"

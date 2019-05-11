@@ -1,3 +1,17 @@
+Function checkAMD()
+oldS:=select()
+select 22
+dbgotop()
+do while eof()=.f.
+ if devices22->AMD == .t.
+  dbselectarea(oldS)
+  return .t.
+ end if
+dbskip()
+end do
+dbselectarea(oldS)
+return .f.
+
 Function GetCurrentAMDNum()
    LOCAL hIn, hOut, hErr
    LOCAL cData, hProc, nLen
