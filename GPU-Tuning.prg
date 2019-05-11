@@ -166,13 +166,13 @@ aDirectory := DIRECTORY(alltrim(basedir)+"benchmark_*.json","F")
 ld=len(aDirectory)
 
 Select 3
- if dbcount(3)=0
+// if dbcount(3)=0
   for nP=1 to ld
    if at("OLD",alltrim(aDirectory[nP,1]))==0
     GetBenchmarksFiles(basedir+alltrim(aDirectory[nP,1]))
    end if
   next
-end if
+//end if
 
   define font oFont name "Tahoma" size 0,-12
   define font oFont2 name "Tahoma" size 0,-18
@@ -647,9 +647,13 @@ use BaseVer SHARED ALIAS "BaseVer"
       cMINER:=alltrim(Overclock33->MINER)
       cALGO:=alltrim(Overclock33->ALGO)
       cOut:=cOut + cDEVID+","+cDEVNUM+","+cMINER+","+cALGO+","
+       select 3
        if Overclock->P11 ==0
+        dbrlock()
         Overclock->P11:=-1
+        dbunlock()
        end if
+       select 10
 
        if Overclock33->P11==-1
         cVolt:=alltrim(str(Overclock33->P11))+","
@@ -820,6 +824,14 @@ aJ = HGetValues( xValue )
 
 cDeviceUUID:=alltrim(HGet( xValue, "DeviceUUID" ))
 cDeviceName:=alltrim(HGet( xValue, "DeviceName" ))
+
+select 3
+dbgotop()
+do while eof() = .f.
+  AADD(aMinersNames, alltrim(cDeviceUUID)+"_"+alltrim(OverClock->DEVID)+"_"+alltrim(OverClock->MINER)+"_"+alltrim(OverClock->ALGO))
+dbskip()
+end do
+
 select 2
 dbsetorder(1)
 dbgotop()
@@ -846,7 +858,11 @@ if dbseek(cDeviceUUID)
          nSecondaryNiceHashID:=(HGet( aD[y], "SecondaryNiceHashID" ))
 
          cMiner_Algo:=HGetValues(aD[y])[z]
-          if ASCAN(aMinersNames, cDeviceUUID+"_"+cMiner_Algo)=0
+         cMiner:=left(cMiner_Algo, at("_", cMiner_Algo)-1)
+         cAlgo:=right(cMiner_Algo, len(cMiner_Algo) - at("_", cMiner_Algo))
+//?ASCAN(aMinersNames, cDeviceUUID+"_"+cMiner+"_"+cAlgo), aMinersNames, cDeviceUUID+"_"+cMiner+"_"+cAlgo
+//?ASCAN(aMinersNames, cDeviceUUID+"_"+cMiner+"_"+cAlgo),cDeviceUUID+"_"+cMiner+"_"+cAlgo
+          if ASCAN(aMinersNames, cDeviceUUID+"_"+alltrim(cDevID)+"_"+cMiner+"_"+cAlgo)=0
            select 3
             dbappend()
             Overclock->DEVID:=cDevID
@@ -861,7 +877,7 @@ if dbseek(cDeviceUUID)
             Overclock->MINER:=cMiner
              cAlgo:=right(cMiner_Algo, len(cMiner_Algo) - at("_", cMiner_Algo))
             Overclock->ALGO:=cAlgo
-            AADD(aMinersNames, cDeviceUUID+"_"+cMiner_Algo)
+            AADD(aMinersNames, cDeviceUUID+"_"+alltrim(cDevID)+"_"+cMiner+"_"+cAlgo)
           end if
         end if
       next
