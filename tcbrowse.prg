@@ -901,7 +901,7 @@ return lOk
 
 METHOD LDblClick( nRowPix, nColPix, nKeyFlags ) CLASS TCBrowse
 
-   local nClickRow := nTCWRow( ::hWnd, ::hDC, nRowPix,;
+   local nClickRow := nTCWRow( ::hWnd, ::hDC, nRowPix,; 
                              If( ::oFont != nil, ::oFont:hFont, 0 ) )
    local nCol
    local uTemp

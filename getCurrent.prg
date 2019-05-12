@@ -22,7 +22,8 @@ cSend:=""
  cProc:="utils\OverdriveNTool.exe -getcurrent"
    hProc := HB_OpenProcess( cProc , @hIn, @hOut, @hErr, .f.  )
 CursorWait()
-inkey(2)
+msgwait("Checking AMD GPUs...","", 2)
+//inkey(2)
 CursorArrow()
 
 //1: Radeon RX 580 Series|GPU_P0=300;750|GPU_P1=600;769|GPU_P2=918;931|GPU_P3=1167;1162|GPU_P4=1239;1150|GPU_P5=1282;1150|GPU_P6=1326;1150|Mem_P0=300;750|Mem_P1=1000;800|Mem_P2=1950;950|Fan_Min=750|Fan_Max=3000|Fan_Target=70|Fan_Acoustic=918|Power_Temp=90|Power_Target=0
@@ -34,7 +35,8 @@ CursorArrow()
 
 cData1:=alltrim(cData)
 if len(alltrim(cData1)) < 1
- msgStop("Error reading from OverdriveNTool.exe", "Error!")
+  return nil
+// msgStop("Error reading from OverdriveNTool.exe", "Error!")
 end if
 
 nFirstAMDGPU:=val(left(cData1,1))
@@ -50,7 +52,8 @@ cSend:=""
  cProc:="utils\OverdriveNTool.exe -getcurrent"
    hProc := HB_OpenProcess( cProc , @hIn, @hOut, @hErr, .f.  )
 CursorWait()
-inkey(2)
+msgwait("Checking AMD GPUs...","", 2)
+//inkey(2)
 CursorArrow()
 
 //1: Radeon RX 580 Series|GPU_P0=300;750|GPU_P1=600;769|GPU_P2=918;931|GPU_P3=1167;1162|GPU_P4=1239;1150|GPU_P5=1282;1150|GPU_P6=1326;1150|Mem_P0=300;750|Mem_P1=1000;800|Mem_P2=1950;950|Fan_Min=750|Fan_Max=3000|Fan_Target=70|Fan_Acoustic=918|Power_Temp=90|Power_Target=0
@@ -221,6 +224,7 @@ ferase("nvidia-smi.log")
 
 __CopyFile( "C:\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe", "utils\nvidia-smi.exe" )
 nErr=waitrun("utils\\nvidia-smi.exe --query -f nvidia-smi.log", 0)
+msgwait("Checking NVIDIA GPUs...","", 1)
 if nErr <> 0
   msgStop("Error code "+alltrim(str(nErr))+" nvidia-smi.exe", "Error!")
   return nil

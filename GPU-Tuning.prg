@@ -100,6 +100,7 @@ public fDate:=filedate("configs\devices.dbf")
 public lS:=.f.
 public nFirstAMDGPU:=0
 public AlgoLbx
+public TotalDevices:=0
 
 REQUEST DESCEND
    RddSetDefault( "DbfCdx" )
@@ -157,6 +158,7 @@ ConvertBases()
 OpenBases()
 
 select 2
+//dbsetorder(1) //uuid
 GetDevices()
 
 Miners:=GetMinersLocations()
@@ -183,6 +185,7 @@ LoadOverClockData()
 select 2
 SET FILTER TO
 dbgotop()
+count to TotalDevices
 
 ChangeAlgos() //init
 //nGet:=0
@@ -213,10 +216,14 @@ cSay1:="Warning! Overclock may DAMAGE GPU!"
  VALID (dbselectarea(3), dbrlock(), Overclock->T1:=nGET1, dbunlock(), AlgoLbx:Refresh(), .t.)
 
 
- REDEFINE GET oGet2 VAR nGET2 ID IDC_EDIT8 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T2:=nGET2, dbunlock(), AlgoLbx:Refresh(), .t.)
+ REDEFINE GET oGet2 VAR nGET2 ID IDC_EDIT8 PICTURE "9999" UPDATE;
+  VALID (dbselectarea(3), dbrlock(), Overclock->T2:=nGET2, dbunlock(), AlgoLbx:Refresh(), .t.)
+//  ON CHANGE (dbselectarea(3), dbrlock(), Overclock->T2:=nGET2, dbunlock(), AlgoLbx:Refresh(), .t.)
  REDEFINE GET oGet3 VAR nGET3 ID IDC_EDIT9 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T3:=nGET3, dbunlock(), AlgoLbx:Refresh(), .t.)
  REDEFINE GET oGet4 VAR nGET4 ID IDC_EDIT10 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T4:=nGET4, dbunlock(), AlgoLbx:Refresh(), .t.)
- REDEFINE GET oGet5 VAR nGET5 ID IDC_EDIT11 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T5:=nGET5, dbunlock(), AlgoLbx:Refresh(), .t.)
+ REDEFINE GET oGet5 VAR nGET5 ID IDC_EDIT11 PICTURE "9999" UPDATE;
+  VALID (dbselectarea(3), dbrlock(), Overclock->T5:=nGET5, dbunlock(), AlgoLbx:Refresh(), .t.)
+//  ON CHANGE (dbselectarea(3), dbrlock(), Overclock->T5:=nGET5, dbunlock(), AlgoLbx:Refresh(), .t.)
  REDEFINE GET oGet6 VAR nGET6 ID IDC_EDIT12 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T6:=nGET6, dbunlock(), AlgoLbx:Refresh(), .t.)
 
  REDEFINE GET oGet8 VAR nGET8 ID IDC_EDIT1 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T8:=nGET8, dbunlock(), AlgoLbx:Refresh(), .t.)
@@ -258,6 +265,12 @@ dbgotop()
            HEADER " Device name" SIZE 100
 
 DevicesLbx:nLineStyle:=4
+
+//DevicesLbx:bRClicked = { | nRowPos, nColumn | ShowPopupDevices( nRowPos, nColumn, DevicesLbx ) }
+//DevicesLbx:bRClicked = { | nRow, nCol | msginfo( nRowPos, nCol ) }
+DevicesLbx:bRClicked     = { | nRow, nCol | ShowPopupDevices( nRow, nCol, DevicesLbx ) }
+//DevicesLbx:bRClicked = { MsgInfo( DevicesLbx:aCols[DevicesLbx:nColSel]:nWidth ) }
+
 
 select 3
  REDEFINE BROWSE AlgoLbx  ID 40001  OF oMainDlg VSCROLL FONT oFont UPDATE
@@ -398,6 +411,42 @@ DevicesLbx:Upstable()
    end if
 
 return nil
+
+function ShowPopupDevices( nRow, nCol, DevicesLbx )
+
+   local oMenuDevices
+   local nColumn := DevicesLbx:nAtCol( nCol )
+   local nRClickRow := nTCWRow( DevicesLbx:hWnd, DevicesLbx:hDC, nRow, oFont:hFont )
+    if nRClickRow == 0 //header
+     return nil
+    end if
+   DevicesLbx:nRowPos := nRClickRow
+   nClickRow := DevicesLbx:nRowPos
+ if nClickRow > TotalDevices
+  return nil
+ end if
+
+return nil //disable
+
+select 2
+dbsetorder(3)
+dbgotop()
+dbskip(nClickRow-1)
+DevicesLbx:Refresh()
+//DevicesLbx:Update()
+AlgoLbx:UpStable()
+ChangeAlgos()
+
+
+   MENU oMenuDevices POPUP
+      MENUITEM "Row: " + Str( nClickRow ) ACTION MsgInfo( "Hello" )
+      MENUITEM "Col: " + Str( nColumn )
+   ENDMENU
+
+   ACTIVATE POPUP oMenuDevices OF DevicesLbx AT nRow, nCol
+
+return nil
+
 
 Function AMD_Disable()
  oGet1:Disable()
@@ -625,7 +674,10 @@ use BaseVer SHARED ALIAS "BaseVer"
        cOut:=cOut +"AMD,"
      //  cDEVID:=strtran(alltrim(Devices22->DEVID), "GPU#", "")
        cDEVID:=alltrim(str(Devices22->NUM0))
-       cDEVNUM:=alltrim(str(Devices22->NUM0)) - nFirstAMDGPU
+       cDEVNUM:=alltrim(str(Devices22->NUM0 - nFirstAMDGPU)) //
+        if Devices22->NUM0 - nFirstAMDGPU < 0
+         msgStop("Numbering error for device "+alltrim(Devices->DEVID)+" ("+cDEVNUM+")", "Error!")
+        end if
       else
        cOut:=cOut +"NVIDIA,"
        cDEVID:=strtran(alltrim(Devices22->DEVID), "GPU#", "")
@@ -741,6 +793,8 @@ aV = HGetKeys( xValue )
 aJ = HGetValues( xValue )
 aDevices:={}
 
+GetCurrentAMDnum()
+DevIDGPUAMD:=nFirstAMDGPU
 
 for i=1 to len(aV)
 
@@ -748,6 +802,7 @@ if aV[i] =="LastDevicesSettup"
 confError:=.f.
   aD:=aJ[i]
 
+aDevAMD:={}
  for y=1 to len(aD) //кол-во устройств
   aZ=HGetKeys(aD[y]) //key
 
@@ -766,16 +821,19 @@ select 2
    end if
    if at("PCI_",aJ[3]) !=0 //AMD PCI_
     if !dbseek(aJ[3])
+//6213
      dbappend()
      Devices->NAME:=aJ[2]
      Devices->ENABLED:=aJ[1]
      Devices->UUID:=aJ[3]
      DevIDGPU++
-     DevIDGPUAMD++
+
      Devices->NUM0:=DevIDGPUAMD
      Devices->DEVID:="GPU#"+alltrim(str(DevIDGPU))
      Devices->AMD:=.t.
      Devices->NVIDIA:=.f.
+     DevIDGPUAMD++
+//       AADD(aDevAMD, {aJ[2], aJ[1], aJ[3], DevIDGPU, DevIDGPUAMD, "GPU#"+alltrim(str(DevIDGPU)) })
     end if
    end if
    if at("GPU-",aJ[3]) !=0 //NVIDIA GPU-
@@ -795,6 +853,22 @@ select 2
 
 
  next
+
+//ASORT( aDevAMD,,, {| x, y | x[3] < y[3] } )
+//nAMD:=DevIDGPU+1
+//nnumAmd:=0
+//for nA=1 to len(aDevAMD)
+//     dbappend()
+//     Devices->NAME:=aDevAMD[nA, 1]
+//     Devices->ENABLED:=aDevAMD[nA, 2]
+//     Devices->UUID:=aDevAMD[nA, 3]
+//     Devices->NUM0:=nnumAmd
+//     nnumAmd++
+//     Devices->DEVID:="GPU#"+alltrim(str(nAMD))
+//     Devices->AMD:=.t.
+//     Devices->NVIDIA:=.f.
+//     nAMD++
+//next
 
 end if
 next
