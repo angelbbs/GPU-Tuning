@@ -426,10 +426,16 @@ function ShowPopupDevices( nRow, nCol, DevicesLbx )
   return nil
  end if
 
-return nil //disable
-
+//return nil //disable
+aDev:={}
 select 2
 dbsetorder(3)
+dbgotop()
+ do while eof()=.f.
+  AADD(aDev, {devices->DEVID, devices->NAME})
+ dbskip()
+ end do
+
 dbgotop()
 dbskip(nClickRow-1)
 DevicesLbx:Refresh()
@@ -439,11 +445,134 @@ ChangeAlgos()
 
 
    MENU oMenuDevices POPUP
-      MENUITEM "Row: " + Str( nClickRow ) ACTION MsgInfo( "Hello" )
-      MENUITEM "Col: " + Str( nColumn )
+      MENUITEM "*** Copy settings from: " ACTION MsgInfo( "Select GPU from the list below" )
+    for nM=1 to len(aDev)
+     if nClickRow <> nM
+      oItem:="oItem"+alltrim(str(nM))
+      MENUITEM &oItem PROMPT alltrim(aDev[nM,1])+" "+alltrim(aDev[nM,2]) ACTION CopyDevSettings(nClickRow, &oItem:cPrompt )
+     end if
+    next
    ENDMENU
 
    ACTIVATE POPUP oMenuDevices OF DevicesLbx AT nRow, nCol
+
+return nil
+
+Function CopyDevSettings(nClickRow, nM)
+//?nClickRow, nM, devices->DEVID
+//nM откуда в строке
+ cDevID:=devices->DEVID
+ cName:=devices->NAME
+select 33
+dbgotop()
+do while eof()=.f.
+// if alltrim(overclock->DEVID)==alltrim(cDevID) .and. alltrim(overclock->NAME)==alltrim(cName)
+ if alltrim(overclock33->DEVID)+" "+alltrim(overclock33->NAME)==alltrim(nM);
+//? overclock->DEVID, overclock->NAME, overclock->MINER, overclock->ALGO
+  cMiner:=overclock33->MINER
+  cAlgo:=overclock33->ALGO
+  lNVIDIA:=overclock33->NVIDIA
+  lENABLED:=overclock33->ENABLED
+  lOENABLED:=overclock33->OENABLED
+  lOENABLE0:=overclock33->OENABLE0
+  lOVISIBLE:=overclock33->OVISIBLE
+  lOVISIBL0:=overclock33->OVISIBL0
+   nP1:=overclock33->P1
+   nP2:=overclock33->P2
+   nP3:=overclock33->P3
+   nP4:=overclock33->P4
+   nP5:=overclock33->P5
+   nP6:=overclock33->P6
+   nP7:=overclock33->P7
+   nP8:=overclock33->P8
+   nP9:=overclock33->P9
+   nP10:=overclock33->P10
+   nP11:=overclock33->P11
+   nP12:=overclock33->P12
+   nP13:=overclock33->P13
+   nP14:=overclock33->P14
+   nP15:=overclock33->P15
+   nP16:=overclock33->P16
+   nT1:=overclock33->T1
+   nT2:=overclock33->T2
+   nT3:=overclock33->T3
+   nT4:=overclock33->T4
+   nT5:=overclock33->T5
+   nT6:=overclock33->T6
+   nT7:=overclock33->T7
+   nT8:=overclock33->T8
+   nT9:=overclock33->T9
+   nT10:=overclock33->T10
+   nT11:=overclock33->T11
+   nT12:=overclock33->T12
+   nT13:=overclock33->T13
+   nT14:=overclock33->T14
+   nT15:=overclock33->T15
+   nT16:=overclock33->T16
+    select 3
+    dbgotop()
+    do while eof()=.f.
+     if alltrim(overclock->DEVID)==alltrim(cDevID) .and. alltrim(overclock->NAME)==alltrim(cName);
+        .and. alltrim(overclock->MINER)==alltrim(cMiner) .and. alltrim(overclock->ALGO)==alltrim(cAlgo)
+//?alltrim(overclock33->DEVID), alltrim(overclock33->NAME), alltrim(overclock33->MINER), alltrim(overclock33->ALGO)
+       dbrlock()
+        overclock->NVIDIA:=lNVIDIA
+        overclock->ENABLED:=lENABLED
+        overclock->OENABLED:=lOENABLED
+        overclock->OENABLE0:=lOENABLE0
+        overclock->OVISIBLE:=lOVISIBLE
+        overclock->OVISIBL0:=lOVISIBL0
+        overclock->P1:=nP1
+        overclock->P2:=nP2
+        overclock->P3:=nP3
+        overclock->P4:=nP4
+        overclock->P5:=nP5
+        overclock->P6:=nP6
+        overclock->P7:=nP7
+        overclock->P8:=nP8
+        overclock->P9:=nP9
+        overclock->P10:=nP10
+        overclock->P11:=nP11
+        overclock->P12:=nP12
+        overclock->P13:=nP13
+        overclock->P14:=nP14
+        overclock->P15:=nP15
+        overclock->P16:=nP16
+        overclock->T1:=nT1
+        overclock->T2:=nT2
+        overclock->T3:=nT3
+        overclock->T4:=nT4
+        overclock->T5:=nT5
+        overclock->T6:=nT6
+        overclock->T7:=nT7
+        overclock->T8:=nT8
+        overclock->T9:=nT9
+        overclock->T10:=nT10
+        overclock->T11:=nT11
+        overclock->T12:=nT12
+        overclock->T13:=nT13
+        overclock->T14:=nT14
+        overclock->T15:=nT15
+        overclock->T16:=nT16
+       dbunlock()
+     end if
+    select 3
+    dbskip()
+    end do
+
+ end if
+
+select 33
+dbskip()
+end do
+dbgotop()
+
+select 3
+dbgotop()
+DevicesLbx:Refresh()
+//DevicesLbx:Update()
+AlgoLbx:UpStable()
+
 
 return nil
 
@@ -643,7 +772,7 @@ return nil
 Function SaveIniFile()
 local cOut:=""
 if checkAMD() == .t.
- GetCurrentAMDNum()
+// GetCurrentAMDNum()
 end if
 select 33
 SET FILTER TO
@@ -664,7 +793,7 @@ dbgotop()
 select 10
 use BaseVer SHARED ALIAS "BaseVer"
 
-
+//?nFirstAMDGPU
   if at("GPU#", Overclock33->DEVID) <> 0
     if (Overclock33->OENABLED .and. (Overclock33->P1+Overclock33->P2+Overclock33->P3+;
        Overclock33->P4+Overclock33->P5+Overclock33->P6 <> 0) .or.;
