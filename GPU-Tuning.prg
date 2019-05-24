@@ -641,9 +641,9 @@ AlgoLbx:UpStable()
 
 return nil
 
-Function CopyAlgoSettings(nClickRow, nM, cMiner, cAlgo)
-//?nClickRow, nM, devices->DEVID
-//nM откуда в строке
+Function CopyAlgoSettings(nClickRow, cPrompt, cMiner, cAlgo)
+cMiner:=strtran(right(cPrompt, len(cPrompt) - at("(", cPrompt)),")","" )
+//?nClickRow, cPrompt, cMiner, cAlgo
  cDevID:=devices->DEVID
  cName:=devices->NAME
 //?cMiner, cAlgo
@@ -1134,34 +1134,40 @@ select 2
 //     Devices->NVIDIA:=.f.
    end if
    if at("PCI_",aJ[3]) !=0 //AMD PCI_
+    DevIDGPU++
     if !dbseek(aJ[3])
 //6213
      dbappend()
      Devices->NAME:=aJ[2]
      Devices->ENABLED:=aJ[1]
      Devices->UUID:=aJ[3]
-     DevIDGPU++
+//     DevIDGPU++
 
      Devices->NUM0:=DevIDGPUAMD
      Devices->DEVID:="GPU#"+alltrim(str(DevIDGPU))
      Devices->AMD:=.t.
      Devices->NVIDIA:=.f.
      DevIDGPUAMD++
+    else
+     DevIDGPUAMD++
 //       AADD(aDevAMD, {aJ[2], aJ[1], aJ[3], DevIDGPU, DevIDGPUAMD, "GPU#"+alltrim(str(DevIDGPU)) })
     end if
    end if
    if at("GPU-",aJ[3]) !=0 //NVIDIA GPU-
+    DevIDGPU++
     if !dbseek(aJ[3])
      dbappend()
      Devices->NAME:=aJ[2]
      Devices->ENABLED:=aJ[1]
      Devices->UUID:=aJ[3]
-     DevIDGPU++
+//     DevIDGPU++
      DevIDGPUNVIDIA++
      Devices->NUM:=DevIDGPUNVIDIA
      Devices->DEVID:="GPU#"+alltrim(str(DevIDGPU))
      Devices->NVIDIA:=.t.
      Devices->AMD:=.f.
+    else
+     DevIDGPUNVIDIA++
     end if
    end if
 
@@ -1230,8 +1236,8 @@ if dbseek(cDeviceUUID)
  lAMD:=Devices->AMD
  lNVIDIA:=Devices->NVIDIA
  lENABLED:=Devices->ENABLED
-
- if alltrim(Devices->NAME) == cDeviceName
+//? alltrim(Devices->NAME), cDeviceName
+// if alltrim(Devices->NAME) == cDeviceName
   select 3
   dbsetorder(5)
   for i=1 to len(aV)
@@ -1250,6 +1256,7 @@ if dbseek(cDeviceUUID)
          cAlgo:=right(cMiner_Algo, len(cMiner_Algo) - at("_", cMiner_Algo))
 //?ASCAN(aMinersNames, cDeviceUUID+"_"+cMiner+"_"+cAlgo), aMinersNames, cDeviceUUID+"_"+cMiner+"_"+cAlgo
 //?ASCAN(aMinersNames, cDeviceUUID+"_"+cMiner+"_"+cAlgo),cDeviceUUID+"_"+cMiner+"_"+cAlgo
+//?aMinersNames, cDeviceUUID+"_"+alltrim(cDevID)+"_"+cMiner+"_"+cAlgo
           if ASCAN(aMinersNames, cDeviceUUID+"_"+alltrim(cDevID)+"_"+cMiner+"_"+cAlgo)=0
            select 3
             dbappend()
@@ -1272,7 +1279,7 @@ if dbseek(cDeviceUUID)
      next
    end if
   next
- end if
+// end if
 end if
 select 3
 SET FILTER TO
