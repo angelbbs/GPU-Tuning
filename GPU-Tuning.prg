@@ -968,11 +968,14 @@ dbgotop()
     end if
 
  do while eof() = .f.
-  if Overclock33->OENABLED = .t.
-  select 22
-  dbsetorder(3)
+  select 22 
+  dbsetorder(1)
+
+  if Overclock33->OENABLED = .t. .and. dbseek(Overclock33->UUID)
+//  select 22
+//  dbsetorder(3)
 //?  dbseek(Overclock33->DEVID), Overclock33->DEVID
- dbseek(Overclock33->DEVID)
+// dbseek(Overclock33->DEVID)
  //***
 select 10
 use BaseVer SHARED ALIAS "BaseVer"
@@ -988,6 +991,7 @@ use BaseVer SHARED ALIAS "BaseVer"
      //  cDEVID:=strtran(alltrim(Devices22->DEVID), "GPU#", "")
        cDEVID:=alltrim(str(Devices22->NUM0))
        cDEVNUM:=alltrim(str(Devices22->NUM0 - nFirstAMDGPU)) //
+//?cDEVID, cDEVNUM, nFirstAMDGPU, Devices22->NAME, Devices22->UUID
         if Devices22->NUM0 - nFirstAMDGPU < 0
          msgStop("Numbering error for device "+alltrim(Devices->DEVID)+" ("+cDEVNUM+")", "Error!")
         end if
@@ -1037,7 +1041,7 @@ use BaseVer SHARED ALIAS "BaseVer"
     end if
   end if
  end if
- select 33
+ select 33 
  dbskip()
  end do
 
@@ -1173,6 +1177,27 @@ select 2
 
 
  next
+
+
+select 2
+dbgotop()
+do while eof() = .f.
+lFound:=.f.
+ for y=1 to len(aD) //кол-во устройств
+  aZ = HGetKeys(aD[y]) //key
+  aJ = HGetValues(aD[y])
+
+   if alltrim(Devices->UUID) == alltrim(aJ[3])
+    lFound:=.t.
+    end id
+ next
+    if lFound == .f.
+     dbrlock()
+     dbdelete()
+     dbunlock()
+    end if
+dbskip()
+end do
 
 //ASORT( aDevAMD,,, {| x, y | x[3] < y[3] } )
 //nAMD:=DevIDGPU+1
