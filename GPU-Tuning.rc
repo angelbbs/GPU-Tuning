@@ -28,9 +28,10 @@ FONT 8, "Ms Shell Dlg"
 BEGIN
     LTEXT           "Warning! Overclock may damage GPU!", 23, 8, 6, 470, 18, SS_LEFT, WS_EX_LEFT
     LISTBOX         40000, 5, 28, 230, 120, WS_TABSTOP | WS_VSCROLL | LBS_DISABLENOSCROLL | LBS_NOINTEGRALHEIGHT | LBS_NOTIFY, WS_EX_LEFT
-    LISTBOX         40001, 10, 208, 470, 165, WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | LBS_DISABLENOSCROLL | LBS_NOINTEGRALHEIGHT | LBS_SORT | LBS_NOTIFY, WS_EX_LEFT
-    AUTOCHECKBOX    "Command window visible", 20, 10, 158, 95, 8, 0, WS_EX_LEFT
-    AUTOCHECKBOX    "Reset to default after mining", 21, 10, 173, 104, 8, 0, WS_EX_LEFT
+    LISTBOX         40001, 10, 210, 470, 165, WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | LBS_DISABLENOSCROLL | LBS_NOINTEGRALHEIGHT | LBS_SORT | LBS_NOTIFY, WS_EX_LEFT
+    AUTOCHECKBOX    "Enable overclock (Run GPU-Scrypt.cmd before mining)", 22, 10, 162, 189, 8, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Reset to default after mining ((Run GPU-Reset.cmd after mining)", 21, 10, 177, 217, 8, 0, WS_EX_LEFT
+    AUTOCHECKBOX    "Command window visible", 20, 10, 192, 95, 8, 0, WS_EX_LEFT
     GROUPBOX        "AMD", IDC_STATIC, 140, 193, 175, 25, 0, WS_EX_LEFT
     GROUPBOX        "AMD", IDC_STATIC, 241, 29, 110, 160, 0, WS_EX_LEFT
     LTEXT           "Memory voltage (mV)", IDC_STATIC, 250, 96, 67, 9, SS_LEFT, WS_EX_LEFT
@@ -65,8 +66,14 @@ BEGIN
     EDITTEXT        IDC_EDIT14, 450, 148, 25, 15, WS_VSCROLL | ES_CENTER | ES_AUTOHSCROLL, WS_EX_LEFT
     LTEXT           "MemoryClock (MHz)", IDC_STATIC, 515, 30, 64, 9, SS_LEFT, WS_EX_LEFT
     PUSHBUTTON      "Save and Exit", 9, 290, 378, 64, 14, 0, WS_EX_LEFT
-    PUSHBUTTON      "Get current", 10, 265, 168, 55, 14, 0, WS_EX_LEFT
-    PUSHBUTTON      "Get current", 11, 385, 168, 55, 14, 0, WS_EX_LEFT
+    PUSHBUTTON      "Get current", 10, 290, 170, 55, 14, 0, WS_EX_LEFT
+    PUSHBUTTON      "Get current", 11, 421, 168, 55, 14, 0, WS_EX_LEFT
     DEFPUSHBUTTON   "Save", 6, 365, 378, 50, 14, 0, WS_EX_LEFT
     PUSHBUTTON      "Cancel", 2, 425, 378, 55, 14, 0, WS_EX_LEFT
 END
+
+
+
+//
+// Icon resources
+//

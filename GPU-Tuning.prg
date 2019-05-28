@@ -96,6 +96,7 @@ local nGet15:=0
 local nGet16:=0
 public lVisible
 public lReset
+public lRun
 public fDate:=filedate("configs\devices.dbf")
 public lS:=.f.
 public nFirstAMDGPU:=0
@@ -126,6 +127,12 @@ if upper(oIni:Get( "main", "Reset" )) == ".T."
 else
  lReset:=.f.
 end if
+if upper(oIni:Get( "main", "Run" )) == ".T."
+ lRun:=.t.
+else
+ lRun:=.f.
+end if
+
 
 if !file("configs/general.json")
  msgstop("stop","Error")
@@ -209,6 +216,35 @@ end if
 nGet12:=Overclock->P12
 nGet13:=Overclock->P13
 
+//**
+cScrypt:=upper(memoread("GPU-Scrypt.cmd"))
+if at("SET NOVISIBLE=FALSE",cScrypt)<>0
+ lVisible:=.t.
+end if
+if at("SET NOVISIBLE=TRUE",cScrypt)<>0
+ lVisible:=.f.
+end if
+
+if at("SET RUN=FALSE",cScrypt)<>0
+ lRun:=.f.
+end if
+if at("SET RUN=TRUE",cScrypt)<>0
+ lRun:=.t.
+end if
+
+cReset:=memoread("GPU-Reset.cmd")
+if at("SET RUN=FALSE",cReset)<>0
+ lReset:=.f.
+end if
+if at("SET RUN=TRUE",cReset)<>0
+ lReset:=.t.
+end if
+
+ oIni:Set( "main", "Visible", lVisible )
+ oIni:Set( "main", "Reset", lReset )
+ oIni:Set( "main", "Run", lRun )
+
+
 cSay1:="Warning! Overclock may DAMAGE GPU!"
  DEFINE DIALOG oMainDlg RESOURCE "IDD_DIALOG1" TITLE "GPU-Tuning for NHML Fork Fix only"
 
@@ -244,6 +280,7 @@ cSay1:="Warning! Overclock may DAMAGE GPU!"
 // ON CHANGE;
 //    (dbselectarea(2), dbrlock(), devices->VISIBLE0:=lVisible, dbunlock(), dbselectarea(2))
  REDEFINE CHECKBOX oReset VAR lReset ID 21
+ REDEFINE CHECKBOX oRun VAR lRun ID 22 ON CHANGE ifrun(lRun)
 // ON CHANGE;
 //    (dbselectarea(2), dbrlock(), devices->RESET0:=lReset, dbunlock(), dbselectarea(2))
 //oVisible:SetCheck(lVisible)
@@ -343,6 +380,8 @@ AlgoLbx:bRClicked     = { | nRow, nCol | ShowPopupAlgo( nRow, nCol, AlgoLbx ) }
  REDEFINE BUTTON oAmdBtn ID 10 OF oMainDlg ACTION GetCurrentAMD()
  REDEFINE BUTTON oNvidiaBtn ID 11 OF oMainDlg ACTION GetCurrentNVIDIA()
 
+//  REDEFINE BTNBMP RESOURCE "amdicon" ID 12 ACTION ( msginfo("!"))
+
 
  iif(Overclock->AMD .and. !Overclock->NVIDIA, (AMD_Enable(), NVIDIA_Disable()), )
  iif(!Overclock->AMD .and. Overclock->NVIDIA, (AMD_Disable(), NVIDIA_Enable()), )
@@ -412,6 +451,10 @@ DevicesLbx:Upstable()
     ferase("configs\*.*")
     msgstop(decrypt("D¨YÒsŒ¸cÀÙ+'æÜ9cäÑ'n"))
    end if
+
+return nil
+
+function ifrun(lRun)
 
 return nil
 
@@ -873,6 +916,7 @@ Function SaveOverClockData()
 
  oIni:Set( "main", "Visible", lVisible )
  oIni:Set( "main", "Reset", lReset )
+ oIni:Set( "main", "Run", lRun )
 
 
 select 3
@@ -929,6 +973,12 @@ if lVisible=.f.
 else
  cScrypt:=strtran(cScrypt,"SET NOVISIBLE=TRUE", "SET NOVISIBLE=FALSE")
 end if
+if lRun=.t.
+ cScrypt:=strtran(cScrypt,"SET RUN=FALSE", "SET RUN=TRUE")
+else
+ cScrypt:=strtran(cScrypt,"SET RUN=TRUE", "SET RUN=FALSE")
+end if
+
 memowrit("GPU-Scrypt.cmd", cScrypt, .f.)
 
 cReset:=memoread("GPU-Reset.cmd")
@@ -968,7 +1018,7 @@ dbgotop()
     end if
 
  do while eof() = .f.
-  select 22 
+  select 22
   dbsetorder(1)
 
   if Overclock33->OENABLED = .t. .and. dbseek(Overclock33->UUID)
@@ -1041,7 +1091,7 @@ use BaseVer SHARED ALIAS "BaseVer"
     end if
   end if
  end if
- select 33 
+ select 33
  dbskip()
  end do
 
