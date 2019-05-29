@@ -380,7 +380,8 @@ AlgoLbx:bRClicked     = { | nRow, nCol | ShowPopupAlgo( nRow, nCol, AlgoLbx ) }
  REDEFINE BUTTON oAmdBtn ID 10 OF oMainDlg ACTION GetCurrentAMD()
  REDEFINE BUTTON oNvidiaBtn ID 11 OF oMainDlg ACTION GetCurrentNVIDIA()
 
-//  REDEFINE BTNBMP RESOURCE "amdicon" ID 12 ACTION ( msginfo("!"))
+  REDEFINE BTNBMP RESOURCE "amdicon" ID 12 ACTION ( SHELLEXECUTE( 0, 0, "utils\\OverdriveNTool.exe", 0, 0, 1 )) NOBORDER NOROUND ADJUST
+  REDEFINE BTNBMP RESOURCE "nvidiaicon" ID 13 ACTION ( SHELLEXECUTE( 0, 0, "utils\\nvidiaInspector.exe", 0, 0, 1 )) NOBORDER NOROUND ADJUST
 
 
  iif(Overclock->AMD .and. !Overclock->NVIDIA, (AMD_Enable(), NVIDIA_Disable()), )

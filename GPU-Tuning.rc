@@ -11,10 +11,16 @@
 //
 // Bitmap resources
 //
+amdicon            BITMAP         "ICONS/amdicon.BMP"
+
+
 checkoff           BITMAP         "ICONS/checkoff.BMP"
 
 
 checkon            BITMAP         "ICONS/checkon.BMP"
+
+
+nvidiaicon         BITMAP         "ICONS/nvidiaicon.BMP"
 
 
 
@@ -26,6 +32,8 @@ STYLE DS_3DLOOK | DS_CENTER | DS_MODALFRAME | DS_SETFONT | WS_CAPTION | WS_VISIB
 CAPTION "Dialog"
 FONT 8, "Ms Shell Dlg"
 BEGIN
+    PUSHBUTTON      "", 13, 388, 166, 16, 16, BS_BITMAP | BS_FLAT, WS_EX_LEFT
+    PUSHBUTTON      "", 12, 255, 168, 16, 16, BS_BITMAP | BS_FLAT, WS_EX_LEFT
     LTEXT           "Warning! Overclock may damage GPU!", 23, 8, 6, 470, 18, SS_LEFT, WS_EX_LEFT
     LISTBOX         40000, 5, 28, 230, 120, WS_TABSTOP | WS_VSCROLL | LBS_DISABLENOSCROLL | LBS_NOINTEGRALHEIGHT | LBS_NOTIFY, WS_EX_LEFT
     LISTBOX         40001, 10, 210, 470, 165, WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | LBS_DISABLENOSCROLL | LBS_NOINTEGRALHEIGHT | LBS_SORT | LBS_NOTIFY, WS_EX_LEFT
@@ -71,9 +79,3 @@ BEGIN
     DEFPUSHBUTTON   "Save", 6, 365, 378, 50, 14, 0, WS_EX_LEFT
     PUSHBUTTON      "Cancel", 2, 425, 378, 55, 14, 0, WS_EX_LEFT
 END
-
-
-
-//
-// Icon resources
-//
