@@ -198,6 +198,21 @@ dbrlock()
   nGet6:=val(cPowerTarget)
    oGet6:VarPut(nGet6)
    oGet6:Refresh()
+
+
+  nGet17:=val(cFanMin)
+   oGet17:VarPut(nGet17)
+   oGet17:Refresh()
+
+  nGet18:=val(cFanMax)
+   oGet18:VarPut(nGet18)
+   oGet18:Refresh()
+
+  nGet19:=val(cFanTarget)
+   oGet19:VarPut(nGet19)
+   oGet19:Refresh()
+
+
   AlgoLbx:Refresh()
 
   Overclock->T1:=val(cGPU_core)
@@ -206,6 +221,9 @@ dbrlock()
   Overclock->T4:=val(cMem_volt)
   Overclock->T5:=val(cPowerTemp)
   Overclock->T6:=val(cPowerTarget)
+  Overclock->T17:=val(cFanMin)
+  Overclock->T18:=val(cFanMax)
+  Overclock->T19:=val(cFanTarget)
 
 dbunlock()
 

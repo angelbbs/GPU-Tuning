@@ -16,3 +16,6 @@
 #define IDC_EDIT11                              40013
 #define IDC_EDIT12                              40014
 #define IDC_EDIT14                              40015
+#define IDC_EDIT15                              40016
+#define IDC_EDIT16                              40017
+#define IDC_EDIT17                              40018

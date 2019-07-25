@@ -36,7 +36,7 @@ DEFAULT pathtofile:=""
 DEFAULT cArch:=""
 newFile:=.f.
 
-if !file(pathtofile+"Devices"+cArch+".dbf")
+//if !file(pathtofile+"Devices"+cArch+".dbf")
  cr_db := {}
  AADD(cr_db, { "NUM", "N", 2, 0 })
  AADD(cr_db, { "NUM0", "N", 2, 0 })
@@ -52,7 +52,7 @@ if !file(pathtofile+"Devices"+cArch+".dbf")
  AADD(cr_db, { "UUID", "C", 100, 0 })
  DBCREATE((pathtofile+"Devices"+cArch+".dbf"), cr_db)
  newFile:=.t.
-end if
+//end if
 
 return newFile
 
@@ -83,6 +83,9 @@ if !file(pathtofile+"Overclock"+cArch+".dbf")
  AADD(cr_db, { "P4", "N", 4, 0 })
  AADD(cr_db, { "P5", "N", 4, 0 })
  AADD(cr_db, { "P6", "N", 4, 0 })
+ AADD(cr_db, { "P17", "N", 4, 0 })
+ AADD(cr_db, { "P18", "N", 4, 0 })
+ AADD(cr_db, { "P19", "N", 4, 0 })
  AADD(cr_db, { "P7", "N", 4, 0 })
  AADD(cr_db, { "P8", "N", 4, 0 })
  AADD(cr_db, { "P9", "N", 4, 0 })
@@ -99,6 +102,9 @@ if !file(pathtofile+"Overclock"+cArch+".dbf")
  AADD(cr_db, { "T4", "N", 4, 0 })
  AADD(cr_db, { "T5", "N", 4, 0 })
  AADD(cr_db, { "T6", "N", 4, 0 })
+ AADD(cr_db, { "T17", "N", 4, 0 })
+ AADD(cr_db, { "T18", "N", 4, 0 })
+ AADD(cr_db, { "T19", "N", 4, 0 })
  AADD(cr_db, { "T7", "N", 4, 0 })
  AADD(cr_db, { "T8", "N", 4, 0 })
  AADD(cr_db, { "T9", "N", 4, 0 })

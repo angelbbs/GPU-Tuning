@@ -94,6 +94,9 @@ local nGet13:=0
 local nGet14:=0
 local nGet15:=0
 local nGet16:=0
+local nGet17:=0
+local nGet18:=0
+local nGet19:=0
 public lVisible
 public lReset
 public lRun
@@ -184,6 +187,24 @@ Select 3
   next
 //end if
 
+select 2
+do while eof() = .f.
+ cUUID:=devices->UUID
+ cDevID:=devices->DEVID
+  select 3
+  SET FILTER TO Overclock->UUID == cUUID
+  dbgotop()
+   do while eof() = .f.
+    dbrlock()
+    Overclock->DEVID:=cDevID
+    dbunlock()
+   dbskip()
+   end do
+select 2
+dbskip()
+end do
+
+
   define font oFont name "Tahoma" size 0,-12
   define font oFont2 name "Tahoma" size 0,-18
 
@@ -205,6 +226,9 @@ nGet3:=Overclock->P3
 nGet4:=Overclock->P4
 nGet5:=Overclock->P5
 nGet6:=Overclock->P6
+nGet17:=Overclock->P17
+nGet18:=Overclock->P18
+nGet19:=Overclock->P19
 //nGet14:=Devices->NUM0 //AMD numbering
 nGet8:=Overclock->P8
 nGet9:=Overclock->P9
@@ -262,6 +286,9 @@ cSay1:="Warning! Overclock may DAMAGE GPU!"
   VALID (dbselectarea(3), dbrlock(), Overclock->T5:=nGET5, dbunlock(), AlgoLbx:Refresh(), .t.)
 //  ON CHANGE (dbselectarea(3), dbrlock(), Overclock->T5:=nGET5, dbunlock(), AlgoLbx:Refresh(), .t.)
  REDEFINE GET oGet6 VAR nGET6 ID IDC_EDIT12 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T6:=nGET6, dbunlock(), AlgoLbx:Refresh(), .t.)
+ REDEFINE GET oGet17 VAR nGET17 ID IDC_EDIT15 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T17:=nGET17, dbunlock(), AlgoLbx:Refresh(), .t.)
+ REDEFINE GET oGet18 VAR nGET18 ID IDC_EDIT16 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T18:=nGET18, dbunlock(), AlgoLbx:Refresh(), .t.)
+ REDEFINE GET oGet19 VAR nGET19 ID IDC_EDIT17 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T19:=nGET19, dbunlock(), AlgoLbx:Refresh(), .t.)
 
  REDEFINE GET oGet8 VAR nGET8 ID IDC_EDIT1 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T8:=nGET8, dbunlock(), AlgoLbx:Refresh(), .t.)
  REDEFINE GET oGet9 VAR nGET9 ID IDC_EDIT2 PICTURE "9999" UPDATE VALID (dbselectarea(3), dbrlock(), Overclock->T9:=nGET9, dbunlock(), AlgoLbx:Refresh(), .t.)
@@ -318,9 +345,17 @@ select 3
             SIZE 18 HEADER " " CENTER
          AlgoLbx:AddColumn( oCol1 )
 
+//         ADD COLUMN TO BROWSE AlgoLbx ;
+//           DATA  " "+alltrim(alltrim(Overclock->ALGO) + " ("+alltrim(Overclock->MINER)+")");
+//           HEADER " Algo (Miner)" SIZE 176
          ADD COLUMN TO BROWSE AlgoLbx ;
-           DATA  " "+alltrim(alltrim(Overclock->ALGO) + " ("+alltrim(Overclock->MINER)+")");
-           HEADER " Algo (Miner)" SIZE 176
+           DATA  " "+alltrim(Overclock->ALGO);
+           HEADER " Algorithm" SIZE 110
+         ADD COLUMN TO BROWSE AlgoLbx ;
+           DATA  " "+alltrim(Overclock->MINER);
+           HEADER " Miner" SIZE 90
+
+
 
 // AMD
          ADD COLUMN TO BROWSE AlgoLbx ;
@@ -340,8 +375,20 @@ select 3
            HEADER "Mem vlt" SIZE 50 PICTURE "@Z 9999"
 
          ADD COLUMN TO BROWSE AlgoLbx ;
+           DATA  Overclock->T17;
+           HEADER "Fan min" SIZE 50 PICTURE "@Z 9999"
+
+         ADD COLUMN TO BROWSE AlgoLbx ;
+           DATA  Overclock->T18;
+           HEADER "Fan max" SIZE 50 PICTURE "@Z 9999"
+
+         ADD COLUMN TO BROWSE AlgoLbx ;
+           DATA  Overclock->T19;
+           HEADER "FTemp" SIZE 40 PICTURE "@Z 9999"
+
+         ADD COLUMN TO BROWSE AlgoLbx ;
            DATA  Overclock->T5;
-           HEADER "Temp" SIZE 38 PICTURE "@Z 9999"
+           HEADER "PTemp" SIZE 40 PICTURE "@Z 9999"
 
          ADD COLUMN TO BROWSE AlgoLbx ;
            DATA  Overclock->T6;
@@ -405,6 +452,9 @@ AlgoLbx:bChange:={| nRow, nCol | ( nGet1:=Overclock->T1, oGet1:Refresh(),;
                      nGet4:=Overclock->T4, oGet4:Refresh(),;
                      nGet5:=Overclock->T5, oGet5:Refresh(),;
                      nGet6:=Overclock->T6, oGet6:Refresh(),;
+                     nGet17:=Overclock->T17, oGet17:Refresh(),;
+                     nGet18:=Overclock->T18, oGet18:Refresh(),;
+                     nGet19:=Overclock->T19, oGet19:Refresh(),;
                      nGet14:=Devices->NUM0, oGet14:Refresh(),;
                      nGet15:=Devices->NUM, oGet15:Refresh(),;
                      nGet8:=Overclock->T8, oGet8:Refresh(),;
@@ -592,6 +642,9 @@ do while eof()=.f.
    nP4:=overclock33->P4
    nP5:=overclock33->P5
    nP6:=overclock33->P6
+   nP17:=overclock33->P17
+   nP18:=overclock33->P18
+   nP19:=overclock33->P19
    nP7:=overclock33->P7
    nP8:=overclock33->P8
    nP9:=overclock33->P9
@@ -608,6 +661,9 @@ do while eof()=.f.
    nT4:=overclock33->T4
    nT5:=overclock33->T5
    nT6:=overclock33->T6
+   nT17:=overclock33->T17
+   nT18:=overclock33->T18
+   nT19:=overclock33->T19
    nT7:=overclock33->T7
    nT8:=overclock33->T8
    nT9:=overclock33->T9
@@ -637,6 +693,9 @@ do while eof()=.f.
         overclock->P4:=nP4
         overclock->P5:=nP5
         overclock->P6:=nP6
+        overclock->P17:=nP17
+        overclock->P18:=nP18
+        overclock->P19:=nP19
         overclock->P7:=nP7
         overclock->P8:=nP8
         overclock->P9:=nP9
@@ -653,6 +712,9 @@ do while eof()=.f.
         overclock->T4:=nT4
         overclock->T5:=nT5
         overclock->T6:=nT6
+        overclock->T17:=nT17
+        overclock->T18:=nT18
+        overclock->T19:=nT19
         overclock->T7:=nT7
         overclock->T8:=nT8
         overclock->T9:=nT9
@@ -712,6 +774,9 @@ do while eof()=.f.
    nP4:=overclock33->P4
    nP5:=overclock33->P5
    nP6:=overclock33->P6
+   nP17:=overclock33->P17
+   nP18:=overclock33->P18
+   nP19:=overclock33->P19
    nP7:=overclock33->P7
    nP8:=overclock33->P8
    nP9:=overclock33->P9
@@ -728,6 +793,9 @@ do while eof()=.f.
    nT4:=overclock33->T4
    nT5:=overclock33->T5
    nT6:=overclock33->T6
+   nT17:=overclock33->T17
+   nT18:=overclock33->T18
+   nT19:=overclock33->T19
    nT7:=overclock33->T7
    nT8:=overclock33->T8
    nT9:=overclock33->T9
@@ -757,6 +825,9 @@ do while eof()=.f.
         overclock->P4:=nP4
         overclock->P5:=nP5
         overclock->P6:=nP6
+        overclock->P17:=nP17
+        overclock->P18:=nP18
+        overclock->P19:=nP19
         overclock->P7:=nP7
         overclock->P8:=nP8
         overclock->P9:=nP9
@@ -773,6 +844,9 @@ do while eof()=.f.
         overclock->T4:=nT4
         overclock->T5:=nT5
         overclock->T6:=nT6
+        overclock->T17:=nT17
+        overclock->T18:=nT18
+        overclock->T19:=nT19
         overclock->T7:=nT7
         overclock->T8:=nT8
         overclock->T9:=nT9
@@ -812,6 +886,9 @@ Function AMD_Disable()
  oGet4:Disable()
  oGet5:Disable()
  oGet6:Disable()
+ oGet17:Disable()
+ oGet18:Disable()
+ oGet19:Disable()
  oGet14:Disable()
  oAmdBtn:Disable()
  oNvidiaBtn:Enable()
@@ -824,6 +901,9 @@ Function AMD_Enable()
  oGet4:Enable()
  oGet5:Enable()
  oGet6:Enable()
+ oGet17:Enable()
+ oGet18:Enable()
+ oGet19:Enable()
  oGet14:Enable()
  oAmdBtn:Enable()
  oNvidiaBtn:Disable()
@@ -880,6 +960,9 @@ dbgotop()
   Overclock->T4:=Overclock->P4
   Overclock->T5:=Overclock->P5
   Overclock->T6:=Overclock->P6
+  Overclock->T17:=Overclock->P17
+  Overclock->T18:=Overclock->P18
+  Overclock->T19:=Overclock->P19
 //   dbselectarea(2)
 //   dbrlock()
 //   Devices->NUM0:=Devices->NUM
@@ -948,6 +1031,9 @@ dbgotop()
   Overclock33->P4:=Overclock33->T4
   Overclock33->P5:=Overclock33->T5
   Overclock33->P6:=Overclock33->T6
+  Overclock33->P17:=Overclock33->T17
+  Overclock33->P18:=Overclock33->T18
+  Overclock33->P19:=Overclock33->T19
 //   dbselectarea(2)
 //   dbrlock()
 //   Devices->NUM:=Devices->NUM0
@@ -1034,7 +1120,7 @@ use BaseVer SHARED ALIAS "BaseVer"
 //?nFirstAMDGPU
   if at("GPU#", Overclock33->DEVID) <> 0
     if (Overclock33->OENABLED .and. (Overclock33->P1+Overclock33->P2+Overclock33->P3+;
-       Overclock33->P4+Overclock33->P5+Overclock33->P6 <> 0) .or.;
+       Overclock33->P4+Overclock33->P5+Overclock33->P6+Overclock33->P17+Overclock33->P18+Overclock33->P19 <> 0) .or.;
        (Overclock33->P8+Overclock33->P9+Overclock33->P10+Overclock33->P11+;
        Overclock33->P12+Overclock33->P13 <> 0) )
       if Overclock33->AMD
@@ -1062,7 +1148,11 @@ use BaseVer SHARED ALIAS "BaseVer"
                  +alltrim(str(Overclock33->P3))+",";
                  +alltrim(str(Overclock33->P4))+",";
                  +alltrim(str(Overclock33->P5))+",";
-                 +alltrim(str(Overclock33->P6))+CRLF
+                 +alltrim(str(Overclock33->P6))+",";
+                 +alltrim(str(Overclock33->P17))+",";
+                 +alltrim(str(Overclock33->P18))+",";
+                 +alltrim(str(Overclock33->P19))+CRLF
+
      else
       cMINER:=alltrim(Overclock33->MINER)
       cALGO:=alltrim(Overclock33->ALGO)
@@ -1298,7 +1388,8 @@ cDeviceName:=alltrim(HGet( xValue, "DeviceName" ))
 select 3
 dbgotop()
 do while eof() = .f.
-  AADD(aMinersNames, alltrim(cDeviceUUID)+"_"+alltrim(OverClock->DEVID)+"_"+alltrim(OverClock->MINER)+"_"+alltrim(OverClock->ALGO))
+//  AADD(aMinersNames, alltrim(cDeviceUUID)+"_"+alltrim(OverClock->DEVID)+"_"+alltrim(OverClock->MINER)+"_"+alltrim(OverClock->ALGO))
+  AADD(aMinersNames, UPPER(alltrim(OverClock->UUID))+"_"+UPPER(alltrim(OverClock->MINER))+"_"+UPPER(alltrim(OverClock->ALGO)))
 dbskip()
 end do
 
@@ -1333,9 +1424,13 @@ if dbseek(cDeviceUUID)
 //?ASCAN(aMinersNames, cDeviceUUID+"_"+cMiner+"_"+cAlgo), aMinersNames, cDeviceUUID+"_"+cMiner+"_"+cAlgo
 //?ASCAN(aMinersNames, cDeviceUUID+"_"+cMiner+"_"+cAlgo),cDeviceUUID+"_"+cMiner+"_"+cAlgo
 //?aMinersNames, cDeviceUUID+"_"+alltrim(cDevID)+"_"+cMiner+"_"+cAlgo
-          if ASCAN(aMinersNames, cDeviceUUID+"_"+alltrim(cDevID)+"_"+cMiner+"_"+cAlgo)=0
+//          if ASCAN(aMinersNames, cDeviceUUID+"_"+alltrim(cDevID)+"_"+cMiner+"_"+cAlgo)=0
+//?alltrim(cDeviceUUID)+"_"+alltrim(cMiner)+"_"+alltrim(cAlgo)
+          if ASCAN(aMinersNames, UPPER(alltrim(cDeviceUUID))+"_"+UPPER(alltrim(cMiner))+"_"+UPPER(alltrim(cAlgo)))=0
            select 3
+
             dbappend()
+            dbrlock()
             Overclock->DEVID:=cDevID
             Overclock->AMD:=lAMD
             Overclock->NVIDIA:=lNVIDIA
@@ -1348,7 +1443,9 @@ if dbseek(cDeviceUUID)
             Overclock->MINER:=cMiner
              cAlgo:=right(cMiner_Algo, len(cMiner_Algo) - at("_", cMiner_Algo))
             Overclock->ALGO:=cAlgo
-            AADD(aMinersNames, cDeviceUUID+"_"+alltrim(cDevID)+"_"+cMiner+"_"+cAlgo)
+            dbunlock()
+//            AADD(aMinersNames, cDeviceUUID+"_"+alltrim(cDevID)+"_"+cMiner+"_"+cAlgo)
+            AADD(aMinersNames, UPPER(alltrim(cDeviceUUID))+"_"+UPPER(alltrim(cMiner))+"_"+UPPER(alltrim(cAlgo)))
           end if
         end if
       next
