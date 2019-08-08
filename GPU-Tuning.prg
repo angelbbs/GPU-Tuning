@@ -188,6 +188,7 @@ Select 3
 //end if
 
 select 2
+dbgotop()
 do while eof() = .f.
  cUUID:=devices->UUID
  cDevID:=devices->DEVID
@@ -591,7 +592,7 @@ select 2
 dbsetorder(3)
 dbgotop()
  do while eof()=.f.
-  AADD(aDev, {devices->DEVID, devices->NAME})
+  AADD(aDev, {devices->DEVID, devices->NAME, devices->UUID})
  dbskip()
  end do
 
@@ -608,7 +609,7 @@ ChangeAlgos()
     for nM=1 to len(aDev)
      if nClickRow <> nM
       oItem:="oItem"+alltrim(str(nM))
-      MENUITEM &oItem PROMPT alltrim(aDev[nM,1])+" "+alltrim(aDev[nM,2]) ACTION CopyDevSettings(nClickRow, &oItem:cPrompt )
+      MENUITEM &oItem PROMPT alltrim(aDev[nM,1])+" "+alltrim(aDev[nM,2]) ACTION (CopyDevSettings(nClickRow, &oItem:cPrompt, &oItem:nId, aDev))
      end if
     next
    ENDMENU
@@ -617,17 +618,21 @@ ChangeAlgos()
 
 return nil
 
-Function CopyDevSettings(nClickRow, nM)
-//?nClickRow, nM, devices->DEVID
+Function CopyDevSettings(nClickRow, nM, nId, aDev)
+//?nClickRow, nM, devices->DEVID, alltrim(aDev[nClickRow,1])+" "+alltrim(aDev[nClickRow,2])
 //nM откуда в строке
  cDevID:=devices->DEVID
  cName:=devices->NAME
+ cUUID:=devices->UUID
+//?aDev[nId-20000,1], aDev[nId-20000,2], aDev[nId-20000,3] //откуда
+//?cDevID, cName, cUUID //куда
 select 33
 dbgotop()
 do while eof()=.f.
 // if alltrim(overclock->DEVID)==alltrim(cDevID) .and. alltrim(overclock->NAME)==alltrim(cName)
- if alltrim(overclock33->DEVID)+" "+alltrim(overclock33->NAME)==alltrim(nM);
-//? overclock->DEVID, overclock->NAME, overclock->MINER, overclock->ALGO
+// if alltrim(overclock33->DEVID)+" "+alltrim(overclock33->NAME)==alltrim(nM)
+ if alltrim(aDev[nId-20000,3])==alltrim(overclock33->UUID)
+//?"Откуда:", alltrim(aDev[nClickRow,3]), nM, overclock33->DEVID, overclock33->NAME, overclock33->MINER, overclock33->ALGO
   cMiner:=overclock33->MINER
   cAlgo:=overclock33->ALGO
   lNVIDIA:=overclock33->NVIDIA
@@ -677,9 +682,10 @@ do while eof()=.f.
     select 3
     dbgotop()
     do while eof()=.f.
-     if alltrim(overclock->DEVID)==alltrim(cDevID) .and. alltrim(overclock->NAME)==alltrim(cName);
+//     if alltrim(overclock->DEVID)==alltrim(cDevID) .and. alltrim(overclock->NAME)==alltrim(cName);
+     if alltrim(overclock->UUID)==alltrim(cUUID);
         .and. alltrim(overclock->MINER)==alltrim(cMiner) .and. alltrim(overclock->ALGO)==alltrim(cAlgo)
-//?alltrim(overclock33->DEVID), alltrim(overclock33->NAME), alltrim(overclock33->MINER), alltrim(overclock33->ALGO)
+//?"Куда:", alltrim(overclock->DEVID), alltrim(overclock->NAME), alltrim(overclock->MINER), alltrim(overclock->ALGO)
        dbrlock()
         overclock->NVIDIA:=lNVIDIA
         overclock->ENABLED:=lENABLED
