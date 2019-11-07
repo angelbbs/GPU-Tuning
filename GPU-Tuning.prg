@@ -107,6 +107,14 @@ public AlgoLbx
 public TotalDevices:=0
 public TotalAlgo:=0
 
+public nAMDadd:=1
+
+if checkIntel()
+ nAMDadd=2
+else
+ nAMDadd=1
+end if
+
 REQUEST DESCEND
    RddSetDefault( "DbfCdx" )
 

@@ -1,1 +1,1 @@
-#define progdate  "08.08.2019" 
+#define progdate  "07.11.2019" 

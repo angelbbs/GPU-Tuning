@@ -1,3 +1,32 @@
+Function checkIntel()
+   LOCAL hIn, hOut, hErr
+   LOCAL cData, hProc, nLen
+   cData := Space( 4096 )
+   cErr := Space( 4096 )
+//ferase("IntelGPU.log")
+
+ cProc:="C:\Windows\SysWOW64\wbem\wmic.exe /output:IntelGPU.log Path Win32_VideoController get Name"
+   hProc := HB_OpenProcess( cProc , @hIn, @hOut, @hErr, .f.  )
+   nLen := Fread( hOut, @cData, 4096 )
+
+if (file("IntelGPU.log"))
+ cData = memoread("IntelGPU.log")
+ cData = strtran(cData, chr(0), "")
+else
+ return .f.
+end if
+//?cData
+if len(alltrim(cData)) < 1
+  return .f.
+end if
+if at("Intel", cData) <> 0
+ return .t.
+end if
+
+return .f.
+
+
+
 Function checkAMD()
 oldS:=select()
 select 22
@@ -25,6 +54,7 @@ CursorWait()
 msgwait("Checking AMD GPUs...","", 2)
 //inkey(2)
 CursorArrow()
+//2: Radeon 550 Series|GPU_P0=214;700|GPU_P1=551;750|GPU_P2=734;750|GPU_P3=980;875|GPU_P4=1046;900|GPU_P5=1098;950|GPU_P6=1124;1000|GPU_P7=1183;1050|Mem_P0=300;700|Mem_P1=625;700|Mem_P2=2050;850|Fan_Min=0|Fan_Max=4600|Fan_Target=80|Fan_Acoustic=850|Power_Temp=93|Power_Target=0
 
 //1: Radeon RX 580 Series|GPU_P0=300;750|GPU_P1=600;769|GPU_P2=918;931|GPU_P3=1167;1162|GPU_P4=1239;1150|GPU_P5=1282;1150|GPU_P6=1326;1150|Mem_P0=300;750|Mem_P1=1000;800|Mem_P2=1950;950|Fan_Min=750|Fan_Max=3000|Fan_Target=70|Fan_Acoustic=918|Power_Temp=90|Power_Target=0
 //2: Radeon RX 560 Series|GPU_P0=300;800|GPU_P1=719;1050|GPU_P2=819;1050|GPU_P3=919;1050|GPU_P4=1019;1050|GPU_P5=1119;1050|GPU_P6=1219;1050|GPU_P7=1319;1050|Mem_P0=300;800|Mem_P1=625;1050|Mem_P2=1950;850|Fan_Min=1155|Fan_Max=3000|Fan_Target=65|Fan_Acoustic=1045|Power_Temp=90|Power_Target=0
@@ -67,7 +97,7 @@ cData1:=alltrim(cData)
 if len(alltrim(cData1)) < 1
  msgStop("Error reading from OverdriveNTool.exe", "Error!")
 end if
-
+//?cData1
 //aAmd:={}
   kLine_p=mlcount(cData1)
 //  nLine=val(strtran(Devices->DEVID,"GPU#",""))+ 1 //нулевой строки быть не может
@@ -76,6 +106,7 @@ end if
 nDevID:=devices->NUM0
 lParse:=.f.
 nFirstAMDGPU:=val(left(cData1,1))
+
 for nLp=1 to kLine_p
 // AADD(aAmd, amemoline(cData1, nL))
 //?nLp
@@ -85,7 +116,11 @@ cGPU:=left(cLine,1) //9 GPU max
 //?left(cLine, 1), strtran(Devices->DEVID,"GPU#","")
 //?val(left(cLine, 1)), val(strtran(Devices->DEVID,"GPU#","")), nDevID, val(alltrim(cGPU))
 //  if val(left(cLine, 1)) == val(strtran(Devices->DEVID,"GPU#","")) .and. nDevID == val(alltrim(cGPU))
-  if val(left(cLine, 1)) == val(strtran(Devices->DEVID,"GPU#",""))-nFirstAMDGPU+1 //
+//2: Radeon 550 Series|GPU_P0=214;700|GPU_P1=551;750|GPU_P2=734;750|GPU_P3=980;875|GPU_P4=1046;900|GPU_P5=1098;950|GPU_P6=1124;1000|GPU_P7=1183;1050|Mem_P0=300;700|Mem_P1=625;700|Mem_P2=2050;850|Fan_Min=0|Fan_Max=4600|Fan_Target=80|Fan_Acoustic=850|Power_Temp=93|Power_Target=0
+//?val(left(cLine, 1)), val(strtran(Devices->DEVID,"GPU#",""))-nFirstAMDGPU+1
+
+  if val(left(cLine, 1)) == val(strtran(Devices->DEVID,"GPU#",""))-nFirstAMDGPU+nAMDadd //
+//  if val(left(cLine, 1)) == val(strtran(Devices->DEVID,"GPU#",""))//
 //  if val(left(cLine, 1)) == nDevID
    parseAMDline(cLine)
    lParse:=.t.
